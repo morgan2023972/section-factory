@@ -1,8 +1,16 @@
 import * as dotenv from "dotenv";
+import { resolveSectionType } from "./sectionTypeMapping";
+import {
+  retryGenerateSection,
+  type ValidationIssue as RetryValidationIssue,
+} from "../generator/retryGenerator";
 import { type DesignSystemOptions } from "../core/designSystemInjector";
 import { generateSection } from "../core/sectionGenerator";
 import { writeSectionToDisk } from "../core/sectionBuilder";
-import { validateSectionCode } from "../core/sectionValidator";
+import {
+  validateSectionCode,
+  type SectionValidationResult,
+} from "../core/sectionValidator";
 import { buildBeforeAfterPrompt } from "../prompts/beforeAfterPrompt";
 import { buildComparisonTablePrompt } from "../prompts/comparisonTablePrompt";
 import {
@@ -18,6 +26,7 @@ import { buildLogoCloudPrompt } from "../prompts/logoCloudPrompt";
 import { buildNewsletterPrompt } from "../prompts/newsletterPrompt";
 import { buildProductGridPrompt } from "../prompts/productGridPrompt";
 import { buildPromoBannerPrompt } from "../prompts/promoBannerPrompt";
+import { shopifyRules } from "../prompts/shopifyRules";
 import { buildTestimonialsPrompt } from "../prompts/testimonialsPrompt";
 import { buildTrustBadgesPrompt } from "../prompts/trustBadgesPrompt";
 
@@ -26,11 +35,10 @@ dotenv.config();
 interface CliOptions {
   sectionType: string;
   designSystem: DesignSystemOptions;
+  maxRetries: number;
 }
 
-const SECTION_TYPE_ALIASES: Record<string, string> = {
-  features: "product-grid",
-};
+const DEFAULT_MAX_RETRIES = 2;
 
 type PromptBuilder = (designSystem: DesignSystemOptions) => string;
 
@@ -56,10 +64,6 @@ function getSupportedSectionTypes(): string[] {
   return Object.keys(SECTION_PROMPT_BUILDERS);
 }
 
-function resolveSectionType(input: string): string {
-  return SECTION_TYPE_ALIASES[input] || input;
-}
-
 function parseCliOptions(argv: string[]): CliOptions {
   const args = [...argv];
   const firstArg = args[0];
@@ -78,6 +82,7 @@ function parseCliOptions(argv: string[]): CliOptions {
 
   let designSystemEnabled = false;
   let profileInput: string | undefined;
+  let maxRetries = DEFAULT_MAX_RETRIES;
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
@@ -97,6 +102,23 @@ function parseCliOptions(argv: string[]): CliOptions {
       profileInput = arg.split("=")[1];
       continue;
     }
+
+    if (arg === "--max-retries") {
+      const retriesValue = Number(args[i + 1]);
+      if (Number.isInteger(retriesValue) && retriesValue >= 0) {
+        maxRetries = retriesValue;
+      }
+      i += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--max-retries=")) {
+      const retriesValue = Number(arg.split("=")[1]);
+      if (Number.isInteger(retriesValue) && retriesValue >= 0) {
+        maxRetries = retriesValue;
+      }
+      continue;
+    }
   }
 
   if (profileInput) {
@@ -106,6 +128,7 @@ function parseCliOptions(argv: string[]): CliOptions {
   if (!designSystemEnabled) {
     return {
       sectionType: resolvedSectionType,
+      maxRetries,
       designSystem: {
         enabled: false,
       },
@@ -125,6 +148,7 @@ function parseCliOptions(argv: string[]): CliOptions {
 
   return {
     sectionType: resolvedSectionType,
+    maxRetries,
     designSystem: {
       enabled: true,
       profile: resolvedProfile,
@@ -147,42 +171,125 @@ function buildPromptForType(
   return builder(designSystem);
 }
 
-async function run(): Promise<void> {
-  const cliOptions = parseCliOptions(process.argv.slice(2));
+export interface CliRuntimeDeps {
+  generateSectionFn: (prompt: string) => Promise<string>;
+  writeSectionToDiskFn: (
+    sectionType: string,
+    sectionCode: string,
+  ) => Promise<string>;
+  validateSectionCodeFn: (
+    sectionCode: string,
+    options?: { designSystemEnabled?: boolean },
+  ) => SectionValidationResult;
+  log: (message: string) => void;
+  error: (message: string) => void;
+}
+
+const DEFAULT_CLI_RUNTIME_DEPS: CliRuntimeDeps = {
+  generateSectionFn: generateSection,
+  writeSectionToDiskFn: writeSectionToDisk,
+  validateSectionCodeFn: validateSectionCode,
+  log: console.log,
+  error: console.error,
+};
+
+function mapValidationErrorsToRetryIssues(
+  errors: string[],
+): RetryValidationIssue[] {
+  return errors.map((message) => ({
+    path: "section",
+    message,
+  }));
+}
+
+export async function runCli(
+  argv: string[],
+  deps: CliRuntimeDeps = DEFAULT_CLI_RUNTIME_DEPS,
+): Promise<number> {
+  const cliOptions = parseCliOptions(argv);
   const prompt = buildPromptForType(
     cliOptions.sectionType,
     cliOptions.designSystem,
   );
 
   if (cliOptions.designSystem.enabled) {
-    console.log(
+    deps.log(
       `Design system enabled with profile: ${cliOptions.designSystem.profile}`,
     );
   }
 
-  const sectionCode = await generateSection(prompt);
-  const validation = validateSectionCode(sectionCode, {
+  const sectionCode = await deps.generateSectionFn(prompt);
+  const validationOptions = {
     designSystemEnabled: cliOptions.designSystem.enabled,
-  });
+  };
+  const validation = deps.validateSectionCodeFn(sectionCode, validationOptions);
 
   if (!validation.isValid) {
-    console.error("Validation failed:");
-    for (const error of validation.errors) {
-      console.error(`- ${error}`);
+    if (cliOptions.maxRetries <= 0) {
+      deps.error("Validation failed:");
+      for (const error of validation.errors) {
+        deps.error(`- ${error}`);
+      }
+      return 1;
     }
-    process.exit(1);
+
+    deps.log(
+      `Validation failed. Starting retry correction (max ${cliOptions.maxRetries} attempts).`,
+    );
+
+    const retryResult = await retryGenerateSection({
+      sectionType: cliOptions.sectionType,
+      originalCode: sectionCode,
+      issues: mapValidationErrorsToRetryIssues(validation.errors),
+      shopifyRules,
+      maxRetries: cliOptions.maxRetries,
+      generateCorrection: deps.generateSectionFn,
+      validateCandidate: (candidateCode) => {
+        const candidateValidation = deps.validateSectionCodeFn(
+          candidateCode,
+          validationOptions,
+        );
+        return mapValidationErrorsToRetryIssues(candidateValidation.errors);
+      },
+    });
+
+    if (!retryResult.success || !retryResult.finalCode) {
+      deps.error("Validation failed after retry attempts:");
+      for (const issue of retryResult.lastIssues) {
+        deps.error(`- ${issue.path}: ${issue.message}`);
+      }
+      return 1;
+    }
+
+    deps.log("Retry correction succeeded.");
+    const outputPath = await deps.writeSectionToDiskFn(
+      cliOptions.sectionType,
+      retryResult.finalCode,
+    );
+    deps.log(`Section generated successfully: ${outputPath}`);
+    return 0;
   }
 
-  const outputPath = await writeSectionToDisk(
+  const outputPath = await deps.writeSectionToDiskFn(
     cliOptions.sectionType,
     sectionCode,
   );
 
-  console.log(`Section generated successfully: ${outputPath}`);
+  deps.log(`Section generated successfully: ${outputPath}`);
+  return 0;
 }
 
-run().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : "Unknown error";
-  console.error(`Section generation failed: ${message}`);
-  process.exit(1);
-});
+if (require.main === module) {
+  runCli(process.argv.slice(2)).then(
+    (exitCode) => {
+      if (exitCode !== 0) {
+        process.exit(exitCode);
+      }
+    },
+    (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.error(`Section generation failed: ${message}`);
+      process.exit(1);
+    },
+  );
+}

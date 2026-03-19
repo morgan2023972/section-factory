@@ -31,12 +31,15 @@ Arborescence principale:
 package.json:
 
 - dependances: openai, dotenv, fs-extra
-- devDependencies: typescript, tsx, @types/node, @types/fs-extra
+- devDependencies: typescript, tsx, @types/node, @types/fs-extra, vitest
 - scripts:
   - dev: tsx src/index.ts
   - generate: tsx src/cli/generateSection.ts
   - build: tsc
   - start: node dist/index.js
+  - test: vitest run
+  - test:unit: vitest run
+  - test:watch: vitest
 
 tsconfig.json:
 
@@ -53,6 +56,44 @@ src/index.ts:
 - charge dotenv
 - exporte startFactory()
 - log de demarrage: Section Factory started
+- commande CLI --list-types
+  - lit getEnabledSectionTypes() depuis le registre central
+  - affiche id, label, category, description
+  - stoppe proprement le flux apres affichage
+
+## 4.1 Registre central des types de sections
+
+src/core/section-types/registry.ts expose:
+
+- SectionTypeId (union litterale)
+- SectionTypeDefinition
+- SECTION_TYPE_REGISTRY (source unique de verite)
+- helpers:
+  - getAllSectionTypes()
+  - getEnabledSectionTypes()
+  - getSectionTypeById(id)
+  - isKnownSectionType(id)
+  - getSectionTypeIds()
+  - getSectionTypesByCategory(category)
+
+Types actuellement declares dans le registre:
+
+- hero
+- faq
+- testimonials
+- product-grid
+- rich-text
+- image-banner
+
+## 4.2 Validation design (strict/non-strict)
+
+src/core/validation/designValidator.ts:
+
+- expose ValidationMode, ValidationIssue, ValidationResult, SectionInput
+- expose validateSection(section, mode)
+- depend du registre central via isKnownSectionType
+- ne contient plus de liste locale de types en dur
+- fichier renomme de deignvalidator.ts vers designValidator.ts
 
 ## 5. Generation IA
 
@@ -184,6 +225,27 @@ Controles couverts:
 - heuristiques de complexite (taille, volume HTML/CSS/JS)
 - fusion optionnelle avec validation design si designSystemEnabled
 
+## 8.1 Retry intelligent de correction
+
+Un module dedie a ete ajoute pour corriger automatiquement une section invalide via l IA:
+
+- src/generator/retryGenerator.ts
+
+Ce module expose:
+
+- retryGenerateSection(params)
+- buildRetryPrompt(...)
+- interfaces de contrat (params, result, attempt, client IA)
+
+Comportement:
+
+- construit un prompt de correction structure a partir des erreurs de validation
+- tente plusieurs corrections jusqu a maxRetries
+- valide chaque candidat
+- arrete au premier code valide
+- garde un historique complet des tentatives
+- gere les reponses vides et exceptions IA
+
 ## 9. Ecriture disque
 
 src/core/sectionBuilder.ts:
@@ -203,7 +265,16 @@ src/cli/generateSection.ts pipeline:
 4. injection design system optionnelle
 5. appel OpenAI
 6. validation section
-7. ecriture fichier
+7. retry intelligent en cas d echec de validation
+8. ecriture fichier uniquement si version valide
+
+Mise a jour recente pour testabilite CLI:
+
+- extraction du mapping alias dans src/cli/sectionTypeMapping.ts
+- export de runCli(argv, deps) pour tests d integration
+- conservation du comportement runtime via execution conditionnelle (require.main)
+- integration du retry via src/generator/retryGenerator.ts
+- mapping des erreurs validator vers le format RetryValidationIssue
 
 ### 10.1 Types supportes
 
@@ -231,13 +302,34 @@ Alias compatibilite:
 
 Si --profile est fourni, le design system est active automatiquement.
 
+### 10.3 Options CLI retry
+
+- --max-retries <nombre>
+- --max-retries=<nombre>
+
+Valeur par defaut:
+
+- 2 tentatives de correction
+
+Comportement:
+
+- si validation initiale invalide et max-retries > 0:
+  - lancement du retry intelligent
+- si aucune correction valide n est trouvee:
+  - la section n est pas exportee
+  - la commande retourne un code de sortie 1
+
 ## 11. Commandes utiles
 
 - npm run dev
 - npm run build
+- npm run test
+- npm run test:unit
+- npm run test:watch
 - npm run generate -- hero
 - npm run generate -- featured-product
 - npm run generate -- product-grid --design-system --profile luxury
+- npm run dev -- --list-types
 
 ## 12. Etat actuel et blocages connus
 
@@ -247,6 +339,10 @@ Ce qui est valide:
 - mapping de types CLI en place
 - alias features actif
 - validations Shopify + design operationnelles
+- registre central des types en place
+- tests unitaires et tests d integration CLI en place
+- CI active avec tests puis build
+- retry intelligent branche dans la CLI de generation
 
 Blocage principal pour generation reelle:
 
@@ -254,7 +350,98 @@ Blocage principal pour generation reelle:
 
 ## 13. Prochaines evolutions recommandees
 
-- ajouter une commande --list-types
-- ajouter tests unitaires pour mapping des types et validation
-- ajouter tests d integration CLI avec fixtures de sections
 - definir un mode strict/non-strict pour la validation design
+- ajouter des fixtures .liquid pour renforcer les tests d integration CLI
+- ajouter des tests d integration de bout en bout (generation + validation + ecriture)
+
+Evolutions deja implementees:
+
+- commande --list-types ajoutee
+- tests unitaires ajoutes pour:
+  - mapping des types CLI
+  - registre central des types
+  - validation design (strict/non-strict)
+  - validation Shopify (sectionValidator)
+- tests d integration CLI ajoutes pour:
+  - alias features -> product-grid
+  - type par defaut hero
+  - activation design system via --profile
+  - gestion des erreurs validation/type/profil
+  - retry reussi apres un premier echec de validation
+
+## 14. Journal des modifications realisees dans cette conversation
+
+Ce qui a ete implemente de bout en bout:
+
+1. Creation d un validator design initial
+
+- creation initiale de src/core/deignvalidator.ts
+
+2. Mise en place du registre central des types
+
+- creation de src/core/section-types/registry.ts
+- ajout du modele de type et des helpers de consultation
+
+3. Refactor du validator design vers le registre central
+
+- import de isKnownSectionType dans src/core/validation/designValidator.ts
+- suppression de la constante locale SECTION_TYPES et du helper local associe
+
+4. Correction de nommage du validator design
+
+- renommage du fichier:
+  - src/core/validation/deignvalidator.ts
+  - vers src/core/validation/designValidator.ts
+
+5. Ajout de la commande CLI --list-types
+
+- mise a jour de src/index.ts avec:
+  - hasArg(flag)
+  - handleListTypesCommand()
+  - affichage aligne id/label/category + description
+
+6. Mise en place des tests unitaires
+
+- installation de vitest
+- ajout des scripts npm test, test:unit, test:watch
+- creation de:
+  - tests/unit/registry.test.ts
+  - tests/unit/designValidator.test.ts
+  - tests/unit/sectionTypeMapping.test.ts
+  - tests/unit/sectionValidator.test.ts
+
+7. Mise en place CI minimale puis renforcement
+
+- creation de .github/workflows/ci.yml
+- execution sur push main et pull_request
+- etapes:
+  - npm ci
+  - npm run test:unit
+  - npm run build
+
+8. Documentation equipe
+
+- creation de README.md (version equipe en francais)
+- creation de ARCHITECTURE.md
+- ajout des templates collaboration:
+  - .github/pull_request_template.md
+  - .github/commit-message-template.txt
+
+9. Tests d integration CLI
+
+- refactor testable de src/cli/generateSection.ts via runCli + injection deps
+- creation de tests/integration/generateSection.cli.integration.test.ts
+- couverture des cas critiques de parsing/options/erreurs
+
+10. Integration du module retry dans la CLI
+
+- creation de src/generator/retryGenerator.ts
+- integration dans src/cli/generateSection.ts apres echec de validation initiale
+- ajout de l option --max-retries (et --max-retries=<n>)
+- ajout d un test dedie au cas retry reussi
+
+11. Etat de validation des tests
+
+- suite vitest verte
+- 5 fichiers de tests
+- 32 tests passes
