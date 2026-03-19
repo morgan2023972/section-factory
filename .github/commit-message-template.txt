@@ -1,0 +1,24 @@
+<type>(<scope>): <résumé court>
+
+Contexte:
+- Pourquoi ce changement est nécessaire
+
+Changements:
+- Point 1
+- Point 2
+
+Tests:
+- npm run test:unit
+- npm run build
+
+Références:
+- Issue/Ticket: <id ou lien>
+
+Types recommandés:
+- feat: nouvelle fonctionnalité
+- fix: correction de bug
+- refactor: amélioration interne sans changement fonctionnel
+- test: ajout/modification de tests
+- docs: documentation
+- ci: pipeline/intégration continue
+- chore: maintenance technique
