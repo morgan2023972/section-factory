@@ -1,3 +1,5 @@
+[![CI](https://github.com/morgan2023972/section-factory/actions/workflows/ci.yml/badge.svg)](https://github.com/morgan2023972/section-factory/actions)
+
 # Section Factory
 
 Section Factory est un projet TypeScript pour générer et valider des sections Shopify avec une architecture claire, testable et extensible.
