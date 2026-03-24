@@ -56,7 +56,7 @@ src/index.ts:
 - charge dotenv
 - exporte startFactory()
 - log de demarrage: Section Factory started
-- commande CLI --list-types
+- commande CLI --list-sections
   - lit getEnabledSectionTypes() depuis le registre central
   - affiche id, label, category, description
   - stoppe proprement le flux apres affichage
@@ -260,6 +260,9 @@ src/core/sectionBuilder.ts:
 src/cli/generateSection.ts pipeline:
 
 1. parse arguments
+
+- support `--strict` (defaut: non-strict)
+
 2. resolve type de section (+ alias)
 3. build prompt selon type
 4. injection design system optionnelle
@@ -267,6 +270,44 @@ src/cli/generateSection.ts pipeline:
 6. validation section
 7. retry intelligent en cas d echec de validation
 8. ecriture fichier uniquement si version valide
+
+src/cli/validateSection.ts pipeline:
+
+1. parse arguments validate
+2. lecture du fichier section cible
+3. validation section sans generation IA
+4. application du mode strict/non-strict sur la severite des diagnostics
+5. emission d un rapport text ou json versionne
+6. code de sortie deterministe (0 valide, 1 invalide, 2 erreur usage/lecture)
+
+src/cli/doctor.ts pipeline:
+
+1. parse arguments doctor
+
+- support `--format text|json`
+
+2. verification presence OPENAI_API_KEY
+3. verification acces modele OpenAI
+4. verification dossiers output et output/sections
+5. verification version Node (>= 20)
+6. verification fichiers de config attendus
+7. emission d un rapport de sante
+8. code de sortie deterministe (0 sain, 1 checks en echec, 2 erreur usage)
+
+Le rapport validate inclut un mapping `ruleId` fin pour faciliter l outillage et preparer la transition AST.
+Exemples de ruleId:
+
+- structure.empty_section
+- schema.missing_tags
+- schema.invalid_json
+- schema.name_required
+- schema.not_configurable
+- css.global_selector
+- js.global_document_access
+- ux.mobile_missing_media_rules
+- ux.mobile_fixed_large_widths
+- ux.mobile_grid_missing_max_width_override
+- design_system.tokens_required
 
 Mise a jour recente pour testabilite CLI:
 
@@ -319,6 +360,21 @@ Comportement:
   - la section n est pas exportee
   - la commande retourne un code de sortie 1
 
+### 10.4 Contraintes du mode strict (generation)
+
+- CSS scope obligatoire sous `.section-{{ section.id }}`
+- Aucun selecteur CSS global
+- Si du JavaScript est present, il doit etre scope a la section
+- Interdit: `document.querySelector`, `document.querySelectorAll`, `getElementById`, `getElementsByClassName`, `getElementsByTagName`, `window.*`, `addEventListener(...)` global
+- Pattern JS recommande en strict:
+
+```js
+const root = document.currentScript?.closest(".section-{{ section.id }}");
+if (!root) return;
+
+const cta = root.querySelector(".section-{{ section.id }}__cta");
+```
+
 ## 11. Commandes utiles
 
 - npm run dev
@@ -327,9 +383,16 @@ Comportement:
 - npm run test:unit
 - npm run test:watch
 - npm run generate -- hero
+- npm run generate -- hero --strict
 - npm run generate -- featured-product
 - npm run generate -- product-grid --design-system --profile luxury
-- npm run dev -- --list-types
+- npm run validate -- output/sections/hero.liquid
+- npm run validate -- output/sections/hero.liquid --strict
+- npm run validate -- output/sections/hero.liquid --non-strict
+- npm run validate -- output/sections/hero.liquid --format=json
+- npm run doctor
+- npm run list-sections
+- npm run dev -- --list-profiles
 
 ## 12. Etat actuel et blocages connus
 
@@ -350,13 +413,19 @@ Blocage principal pour generation reelle:
 
 ## 13. Prochaines evolutions recommandees
 
-- definir un mode strict/non-strict pour la validation design
 - ajouter des fixtures .liquid pour renforcer les tests d integration CLI
 - ajouter des tests d integration de bout en bout (generation + validation + ecriture)
+- preparer le branchement d un moteur AST sous le meme contrat de rapport versionne
 
 Evolutions deja implementees:
 
-- commande --list-types ajoutee
+- commande --list-sections ajoutee
+- commande --list-profiles ajoutee
+- commande validate ajoutee pour separer generation et validation
+- mode strict/non-strict ajoute a validate
+- rapport validate JSON versionne (reportVersion et reportSchemaVersion)
+- mapping ruleId fin ajoute a validate (schema, css, js, mobile, design_system)
+- commande doctor ajoutee pour verifier la sante de l environnement
 - tests unitaires ajoutes pour:
   - mapping des types CLI
   - registre central des types
@@ -400,7 +469,15 @@ Ce qui a ete implemente de bout en bout:
   - handleListTypesCommand()
   - affichage aligne id/label/category + description
 
-6. Mise en place des tests unitaires
+6. Ajout de la commande CLI --list-profiles
+
+- mise a jour de src/index.ts avec:
+  - handleListProfilesCommand()
+  - affichage des profils disponibles
+  - resume globalStyle par profil
+  - marquage du profil par defaut
+
+7. Mise en place des tests unitaires
 
 - installation de vitest
 - ajout des scripts npm test, test:unit, test:watch
@@ -410,7 +487,7 @@ Ce qui a ete implemente de bout en bout:
   - tests/unit/sectionTypeMapping.test.ts
   - tests/unit/sectionValidator.test.ts
 
-7. Mise en place CI minimale puis renforcement
+8. Mise en place CI minimale puis renforcement
 
 - creation de .github/workflows/ci.yml
 - execution sur push main et pull_request
@@ -419,7 +496,7 @@ Ce qui a ete implemente de bout en bout:
   - npm run test:unit
   - npm run build
 
-8. Documentation equipe
+9. Documentation equipe
 
 - creation de README.md (version equipe en francais)
 - creation de ARCHITECTURE.md
@@ -427,21 +504,21 @@ Ce qui a ete implemente de bout en bout:
   - .github/pull_request_template.md
   - .github/commit-message-template.txt
 
-9. Tests d integration CLI
+10. Tests d integration CLI
 
 - refactor testable de src/cli/generateSection.ts via runCli + injection deps
 - creation de tests/integration/generateSection.cli.integration.test.ts
 - couverture des cas critiques de parsing/options/erreurs
 
-10. Integration du module retry dans la CLI
+11. Integration du module retry dans la CLI
 
 - creation de src/generator/retryGenerator.ts
 - integration dans src/cli/generateSection.ts apres echec de validation initiale
-- ajout de l option --max-retries (et --max-retries=<n>)
+- ajout de l option --max-retries (et --max-retries=n)
 - ajout d un test dedie au cas retry reussi
 
-11. Etat de validation des tests
+12. Etat de validation des tests
 
 - suite vitest verte
-- 5 fichiers de tests
-- 32 tests passes
+- 10 fichiers de tests
+- 63 tests passes

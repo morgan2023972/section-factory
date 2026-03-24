@@ -26,11 +26,13 @@ Le projet est organise autour de 4 couches:
 
 - src/index.ts
   - Point d entree principal
-  - Gere les arguments CLI (dont --list-types)
+  - Gere les commandes de discovery CLI (`--list-sections`, `--list-profiles`)
 
 - src/cli/
   - Scripts CLI specialises
-  - Exemple: generation de section
+  - `generateSection.ts`: generation + retry
+  - `validateSection.ts`: validation seule (report text/json)
+  - `doctor.ts`: checks environnement (env, modele, dossiers, config, runtime)
 
 - src/core/
   - Logique metier principale
@@ -103,9 +105,38 @@ Responsabilites:
 
 Commande implementee:
 
-- --list-types
+- --list-sections
   - Lit getEnabledSectionTypes() depuis le registre
   - Affiche id, label, category, description
+- --list-profiles
+  - Lit les profils design system disponibles
+  - Affiche profil + resume et profil par defaut
+
+Fichier: src/cli/generateSection.ts
+
+- Commande `npm run generate -- <type> [options]`
+- Garde la responsabilite de generation IA et de retry
+- Validation non-strict par defaut pendant la generation
+- Supporte `--strict` pour rendre les regles de generation bloquantes
+
+Fichier: src/cli/validateSection.ts
+
+- Commande `npm run validate -- <file> [options]`
+- Valide un fichier section existant sans generation IA
+- Supporte `--mode strict|non-strict` et `--format text|json`
+- Produit un rapport versionne (`reportVersion`, `reportSchemaVersion`)
+- Retourne des diagnostics avec `ruleId` fins pour preparer la migration AST
+
+Fichier: src/cli/doctor.ts
+
+- Commande `npm run doctor`
+- Supporte `--format text|json` pour sortie lisible ou machine-readable
+- Verifie l'environnement local de generation/validation:
+  - OPENAI_API_KEY
+  - acces au modele OpenAI
+  - dossiers output attendus
+  - version Node compatible
+  - presence des fichiers de config attendus
 
 ## Flux principal (simplifie)
 
@@ -121,7 +152,11 @@ Commande implementee:
 - Framework: Vitest
 - Cibles actuelles:
   - Registre des types
+  - CLI index (list-sections/list-profiles)
+  - CLI generate (integration)
+  - CLI validate (unit + integration)
   - Validator design
+  - Validator Shopify
 
 Scripts npm:
 

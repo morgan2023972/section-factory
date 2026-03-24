@@ -1,39 +1,84 @@
 import * as dotenv from "dotenv";
+import {
+  DEFAULT_DESIGN_PROFILE,
+  DESIGN_PROFILE_NAMES,
+  getDesignProfile,
+} from "./prompts/designSystemProfiles";
 import { getEnabledSectionTypes } from "./core/section-types/registry";
+import { getAliasesForSectionType } from "./cli/sectionTypeMapping";
 
 dotenv.config();
 
-function hasArg(flag: string): boolean {
-  return process.argv.includes(flag);
+function hasArg(flag: string, argv: string[]): boolean {
+  return argv.includes(flag);
 }
 
-function handleListTypesCommand(): void {
+function handleListSectionsCommand(log: (message: string) => void): void {
   const sectionTypes = getEnabledSectionTypes();
 
-  console.log("Available section types:\n");
+  log("Available sections:\n");
 
-  const idWidth = Math.max(...sectionTypes.map((type) => type.id.length), 4);
-  const labelWidth = Math.max(
-    ...sectionTypes.map((type) => type.label.length),
-    5,
-  );
+  type SectionRow = {
+    type: string;
+    alias: string;
+    description: string;
+    designSystem: string;
+  };
 
-  for (const sectionType of sectionTypes) {
-    console.log(
-      `- ${sectionType.id.padEnd(idWidth)} | ${sectionType.label.padEnd(labelWidth)} | ${sectionType.category}`,
+  const rows: SectionRow[] = sectionTypes.map((sectionType) => {
+    const aliases = getAliasesForSectionType(sectionType.id);
+
+    return {
+      type: sectionType.id,
+      alias: aliases.length > 0 ? aliases.join(", ") : "-",
+      description: sectionType.description,
+      designSystem: sectionType.supportsDesignSystem ? "yes" : "no",
+    };
+  });
+
+  log("type | alias | description | design-system");
+  log("--- | --- | --- | ---");
+
+  for (const row of rows) {
+    log(
+      `${row.type} | ${row.alias} | ${row.description} | ${row.designSystem}`,
     );
-    console.log(`  ${sectionType.description}`);
-    console.log("");
   }
 }
 
-export function startFactory(): void {
-  if (hasArg("--list-types")) {
-    handleListTypesCommand();
+function handleListProfilesCommand(log: (message: string) => void): void {
+  log("Available design profiles:\n");
+
+  for (const profileName of DESIGN_PROFILE_NAMES) {
+    const profile = getDesignProfile(profileName);
+    const defaultMarker =
+      profileName === DEFAULT_DESIGN_PROFILE ? " (default)" : "";
+
+    log(`- ${profileName}${defaultMarker}`);
+    log(`  ${profile.globalStyle}`);
+    log("");
+  }
+}
+
+export function startFactory(argv: string[] = process.argv): void {
+  if (hasArg("--list-sections", argv) || hasArg("--list-section", argv)) {
+    handleListSectionsCommand(console.log);
+    return;
+  }
+
+  if (hasArg("--list-types", argv)) {
+    handleListSectionsCommand(console.log);
+    return;
+  }
+
+  if (hasArg("--list-profiles", argv)) {
+    handleListProfilesCommand(console.log);
     return;
   }
 
   console.log("Section Factory started");
 }
 
-startFactory();
+if (require.main === module) {
+  startFactory(process.argv);
+}

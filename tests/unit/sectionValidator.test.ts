@@ -38,6 +38,44 @@ function makeValidSectionCode(): string {
 `.trim();
 }
 
+function makeValidSectionCodeWithMediaScreen(): string {
+  return `
+<div class="section-{{ section.id }}">
+  <button class="section-{{ section.id }}__cta">{{ section.settings.button_label }}</button>
+</div>
+
+<style>
+.section-{{ section.id }} {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.section-{{ section.id }}__cta {
+  background-color: #111;
+  color: #fff;
+  outline: none;
+}
+
+@media screen and (max-width: 749px) {
+  .section-{{ section.id }} {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    { "type": "text", "id": "button_label", "label": "Button label" }
+  ],
+  "blocks": [],
+  "presets": [{ "name": "Hero" }]
+}
+{% endschema %}
+`.trim();
+}
+
 describe("section validator", () => {
   it("returns valid for a compliant section", () => {
     const result = validateSectionCode(makeValidSectionCode());
@@ -124,5 +162,20 @@ describe("section validator", () => {
         error.includes('CSS must be scoped with ".section-{{ section.id }}".'),
       ),
     ).toBe(true);
+  });
+
+  it("accepts @media screen and (max-width: ...) as responsive rule", () => {
+    const result = validateSectionCode(makeValidSectionCodeWithMediaScreen());
+
+    expect(
+      result.errors.some((error) =>
+        error.includes("Mobile UX issue: missing responsive @media rules."),
+      ),
+    ).toBe(false);
+    expect(
+      result.errors.some((error) =>
+        error.includes("Global CSS selectors are not allowed:"),
+      ),
+    ).toBe(false);
   });
 });

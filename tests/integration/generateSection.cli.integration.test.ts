@@ -81,6 +81,54 @@ describe("CLI integration - generateSection", () => {
     expect(deps.writeSectionToDiskFn).not.toHaveBeenCalled();
   });
 
+  it("accepts non-blocking validation issues in non-strict mode", async () => {
+    const deps = createDeps();
+    deps.validateSectionCodeFn = vi.fn(() => ({
+      isValid: false,
+      errors: [
+        "Global JS access is not allowed: scope JS to the section element.",
+        "Mobile UX issue: missing responsive @media rules.",
+        "Global CSS selectors are not allowed: body",
+      ],
+    }));
+
+    const exitCode = await runCli(["hero"], deps);
+
+    expect(exitCode).toBe(0);
+    expect(deps.log).toHaveBeenCalledWith(
+      "[Validation warning] Global JS access is not allowed: scope JS to the section element.",
+    );
+    expect(deps.log).toHaveBeenCalledWith(
+      "[Validation warning] Mobile UX issue: missing responsive @media rules.",
+    );
+    expect(deps.log).toHaveBeenCalledWith(
+      "[Validation warning] Global CSS selectors are not allowed: body",
+    );
+    expect(deps.writeSectionToDiskFn).toHaveBeenCalledWith(
+      "hero",
+      "mock-section-code",
+    );
+  });
+
+  it("keeps strict mode blocking for the same issues", async () => {
+    const deps = createDeps();
+    deps.validateSectionCodeFn = vi.fn(() => ({
+      isValid: false,
+      errors: [
+        "Global JS access is not allowed: scope JS to the section element.",
+        "Mobile UX issue: missing responsive @media rules.",
+      ],
+    }));
+
+    const exitCode = await runCli(["hero", "--strict"], deps);
+
+    expect(exitCode).toBe(1);
+    expect(deps.log).toHaveBeenCalledWith(
+      "Validation failed. Starting retry correction (max 2 attempts).",
+    );
+    expect(deps.writeSectionToDiskFn).not.toHaveBeenCalled();
+  });
+
   it("retries and succeeds after an initial validation failure", async () => {
     const deps = createDeps();
     deps.generateSectionFn = vi

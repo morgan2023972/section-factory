@@ -12,5 +12,8 @@ Build a Shopify hero section with the following capabilities:
 - Fully configurable schema settings for all hero content and behavior.
 
 Ensure the generated code includes meaningful defaults in schema settings.
+If JavaScript is included, scope it with:
+const root = document.currentScript?.closest('.section-{{ section.id }}');
+and only query inside root (never use global document selectors).
 Return only the complete section code.`;
 }

@@ -46,6 +46,7 @@ describe("section types registry", () => {
       label: expect.any(String),
       description: expect.any(String),
       category: expect.any(String),
+      supportsDesignSystem: expect.any(Boolean),
       enabled: expect.any(Boolean),
     });
   });
@@ -62,6 +63,7 @@ describe("section types registry", () => {
       expect(definition).toHaveProperty("label");
       expect(definition).toHaveProperty("description");
       expect(definition).toHaveProperty("category");
+      expect(definition).toHaveProperty("supportsDesignSystem");
       expect(definition).toHaveProperty("enabled");
     }
   });

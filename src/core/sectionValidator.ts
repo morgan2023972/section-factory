@@ -58,17 +58,27 @@ function getGlobalCssSelectors(cssContent: string): string[] {
       .filter(Boolean);
 
     for (const selector of selectors) {
-      const lower = selector.toLowerCase();
+      const normalizedSelector = selector.replace(/\s+/g, " ").trim();
+      const lower = normalizedSelector.toLowerCase();
+
+      // Ignore malformed declaration fragments that are not selectors.
+      if (
+        normalizedSelector.includes(";") ||
+        normalizedSelector.startsWith("@") ||
+        /^[a-z-]+\s*:\s+.+$/i.test(normalizedSelector)
+      ) {
+        continue;
+      }
 
       if (/^(from|to|\d+%)$/.test(lower)) {
         continue;
       }
 
       if (
-        !selector.startsWith(".section-SECTION_ID") &&
-        !selector.includes(".section-SECTION_ID")
+        !normalizedSelector.startsWith(".section-SECTION_ID") &&
+        !normalizedSelector.includes(".section-SECTION_ID")
       ) {
-        disallowedSelectors.push(selector);
+        disallowedSelectors.push(normalizedSelector);
       }
     }
   }
@@ -124,7 +134,7 @@ function validateMobileUx(cssContent: string, errors: string[]): void {
     return;
   }
 
-  const hasMediaQueries = /@media\s*\(/i.test(cssContent);
+  const hasMediaQueries = /@media\b/i.test(cssContent);
   if (!hasMediaQueries) {
     errors.push("Mobile UX issue: missing responsive @media rules.");
   }
@@ -140,7 +150,7 @@ function validateMobileUx(cssContent: string, errors: string[]): void {
     /grid-template-columns\s*:\s*repeat\(\s*([3-9]|\d{2,})\s*,/i.exec(
       cssContent,
     );
-  if (multiColumnGrid && !/@media\s*\([^)]+max-width/i.test(cssContent)) {
+  if (multiColumnGrid && !/@media\b[^\{]*max-width/i.test(cssContent)) {
     errors.push(
       "Mobile UX issue: multi-column grid without mobile max-width override.",
     );

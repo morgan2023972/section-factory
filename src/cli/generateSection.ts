@@ -36,6 +36,7 @@ interface CliOptions {
   sectionType: string;
   designSystem: DesignSystemOptions;
   maxRetries: number;
+  validationMode: "strict" | "non-strict";
 }
 
 const DEFAULT_MAX_RETRIES = 2;
@@ -83,6 +84,7 @@ function parseCliOptions(argv: string[]): CliOptions {
   let designSystemEnabled = false;
   let profileInput: string | undefined;
   let maxRetries = DEFAULT_MAX_RETRIES;
+  let validationMode: "strict" | "non-strict" = "non-strict";
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
@@ -119,6 +121,16 @@ function parseCliOptions(argv: string[]): CliOptions {
       }
       continue;
     }
+
+    if (arg === "--strict") {
+      validationMode = "strict";
+      continue;
+    }
+
+    if (arg === "--non-strict") {
+      validationMode = "non-strict";
+      continue;
+    }
   }
 
   if (profileInput) {
@@ -129,6 +141,7 @@ function parseCliOptions(argv: string[]): CliOptions {
     return {
       sectionType: resolvedSectionType,
       maxRetries,
+      validationMode,
       designSystem: {
         enabled: false,
       },
@@ -149,6 +162,7 @@ function parseCliOptions(argv: string[]): CliOptions {
   return {
     sectionType: resolvedSectionType,
     maxRetries,
+    validationMode,
     designSystem: {
       enabled: true,
       profile: resolvedProfile,
@@ -202,6 +216,38 @@ function mapValidationErrorsToRetryIssues(
   }));
 }
 
+function isNonBlockingGenerationError(message: string): boolean {
+  return (
+    message.startsWith("Mobile UX issue:") ||
+    message.startsWith("Global CSS selectors are not allowed:") ||
+    message === "Global JS access via document.* selectors is not allowed." ||
+    message ===
+      "Global JS access is not allowed: scope JS to the section element."
+  );
+}
+
+function splitValidationErrorsByMode(
+  errors: string[],
+  mode: "strict" | "non-strict",
+): { blockingErrors: string[]; warningErrors: string[] } {
+  if (mode === "strict") {
+    return {
+      blockingErrors: errors,
+      warningErrors: [],
+    };
+  }
+
+  const warningErrors = errors.filter(isNonBlockingGenerationError);
+  const blockingErrors = errors.filter(
+    (errorMessage) => !isNonBlockingGenerationError(errorMessage),
+  );
+
+  return {
+    blockingErrors,
+    warningErrors,
+  };
+}
+
 export async function runCli(
   argv: string[],
   deps: CliRuntimeDeps = DEFAULT_CLI_RUNTIME_DEPS,
@@ -223,11 +269,19 @@ export async function runCli(
     designSystemEnabled: cliOptions.designSystem.enabled,
   };
   const validation = deps.validateSectionCodeFn(sectionCode, validationOptions);
+  const initialValidation = splitValidationErrorsByMode(
+    validation.errors,
+    cliOptions.validationMode,
+  );
 
-  if (!validation.isValid) {
+  for (const warning of initialValidation.warningErrors) {
+    deps.log(`[Validation warning] ${warning}`);
+  }
+
+  if (initialValidation.blockingErrors.length > 0) {
     if (cliOptions.maxRetries <= 0) {
       deps.error("Validation failed:");
-      for (const error of validation.errors) {
+      for (const error of initialValidation.blockingErrors) {
         deps.error(`- ${error}`);
       }
       return 1;
@@ -240,7 +294,9 @@ export async function runCli(
     const retryResult = await retryGenerateSection({
       sectionType: cliOptions.sectionType,
       originalCode: sectionCode,
-      issues: mapValidationErrorsToRetryIssues(validation.errors),
+      issues: mapValidationErrorsToRetryIssues(
+        initialValidation.blockingErrors,
+      ),
       shopifyRules,
       maxRetries: cliOptions.maxRetries,
       generateCorrection: deps.generateSectionFn,
@@ -249,7 +305,11 @@ export async function runCli(
           candidateCode,
           validationOptions,
         );
-        return mapValidationErrorsToRetryIssues(candidateValidation.errors);
+        const normalized = splitValidationErrorsByMode(
+          candidateValidation.errors,
+          cliOptions.validationMode,
+        );
+        return mapValidationErrorsToRetryIssues(normalized.blockingErrors);
       },
     });
 

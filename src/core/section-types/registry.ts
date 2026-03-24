@@ -11,6 +11,7 @@ export interface SectionTypeDefinition {
   label: string;
   description: string;
   category: string;
+  supportsDesignSystem: boolean;
   enabled: boolean;
 }
 
@@ -20,6 +21,7 @@ export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
     label: "Hero",
     description: "Top banner section with heading, text, CTA and media",
     category: "marketing",
+    supportsDesignSystem: true,
     enabled: true,
   },
   {
@@ -27,6 +29,7 @@ export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
     label: "FAQ",
     description: "Expandable frequently asked questions section",
     category: "content",
+    supportsDesignSystem: true,
     enabled: true,
   },
   {
@@ -34,6 +37,7 @@ export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
     label: "Testimonials",
     description: "Customer quotes and social proof section",
     category: "social-proof",
+    supportsDesignSystem: true,
     enabled: true,
   },
   {
@@ -41,6 +45,7 @@ export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
     label: "Product Grid",
     description: "Grid of featured or selected products",
     category: "catalog",
+    supportsDesignSystem: true,
     enabled: true,
   },
   {
@@ -48,6 +53,7 @@ export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
     label: "Rich Text",
     description: "Formatted text content section",
     category: "content",
+    supportsDesignSystem: true,
     enabled: true,
   },
   {
@@ -55,6 +61,7 @@ export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
     label: "Image Banner",
     description: "Large image section with overlay content",
     category: "media",
+    supportsDesignSystem: true,
     enabled: true,
   },
 ];

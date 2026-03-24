@@ -4,8 +4,9 @@ Shopify Section Generation Rules:
 1. Scope all CSS with ".section-{{ section.id }}".
 2. JavaScript must be scoped to the section element only.
 3. Do not write global CSS.
-4. Do not use document.querySelector.
-5. The schema must include: name, settings, blocks, and presets.
+4. Do not use document.querySelector, document.querySelectorAll, getElementById, getElementsByClassName, or getElementsByTagName.
+5. If JavaScript is needed, resolve root with this pattern only: const root = document.currentScript?.closest('.section-{{ section.id }}'); and then use root.querySelector(...).
+6. The schema must include: name, settings, blocks, and presets.
 `;
 
 export default shopifyRules;

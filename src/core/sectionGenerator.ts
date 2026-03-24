@@ -1,13 +1,12 @@
 import OpenAI from "openai";
 
-const apiKey = process.env.OPENAI_API_KEY;
-
-const client = apiKey ? new OpenAI({ apiKey }) : null;
-
 export async function generateSection(prompt: string): Promise<string> {
   if (!prompt || !prompt.trim()) {
     throw new Error("Prompt is required to generate a section.");
   }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  const client = apiKey ? new OpenAI({ apiKey }) : null;
 
   if (!client) {
     throw new Error("Missing OPENAI_API_KEY environment variable.");

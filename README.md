@@ -13,7 +13,11 @@ Section Factory est un projet TypeScript pour générer et valider des sections 
 
 - Registre central des types de sections
 - Validator de section branché sur le registre central
-- Commande CLI --list-types
+- Commande CLI --list-sections (commande dediee)
+- Commande CLI --list-profiles
+- Commande CLI validate dédiée (validation séparée de la génération)
+- Commande CLI doctor pour vérifier la santé de l'environnement
+- Mapping de diagnostics validate avec ruleId fins (schema, css, js, mobile, design_system)
 - Tests unitaires avec Vitest
 - Pipeline CI avec tests puis build
 
@@ -44,11 +48,104 @@ Lancer le projet en dev :
 npm run dev
 ```
 
-Lister les types de sections disponibles :
+Lister les sections disponibles (type, alias, description, support design-system) :
+
+```bash
+npm run list-sections
+```
+
+Compatibilite legacy :
 
 ```bash
 npm run dev -- --list-types
 ```
+
+Lister les profils design disponibles :
+
+```bash
+npm run dev -- --list-profiles
+```
+
+Generer une section hero (validation non-strict par defaut) :
+
+```bash
+npm run generate -- hero
+```
+
+Forcer une generation avec validation stricte :
+
+```bash
+npm run generate -- hero --strict
+```
+
+Contraintes du mode strict (generation):
+
+- CSS scope obligatoire sous `.section-{{ section.id }}`
+- Aucun selecteur CSS global
+- Si du JavaScript est present, il doit etre scope a la section
+- Interdit: `document.querySelector`, `document.querySelectorAll`, `getElementById`, `getElementsByClassName`, `getElementsByTagName`, `window.*`, `addEventListener(...)` global
+- Pattern JS recommande en strict:
+
+```js
+const root = document.currentScript?.closest(".section-{{ section.id }}");
+if (!root) return;
+
+const cta = root.querySelector(".section-{{ section.id }}__cta");
+```
+
+Valider une section existante sans génération :
+
+```bash
+npm run validate -- output/sections/hero.liquid
+```
+
+Valider en mode non-strict (certaines règles deviennent des warnings) :
+
+```bash
+npm run validate -- output/sections/hero.liquid --non-strict
+```
+
+Valider avec sortie JSON (préparation CI/outillage) :
+
+```bash
+npm run validate -- output/sections/hero.liquid --format=json
+```
+
+Vérifier l'environnement avec doctor :
+
+```bash
+npm run doctor
+```
+
+Vérifier l'environnement avec sortie JSON :
+
+```bash
+npm run doctor -- --format=json
+```
+
+Le doctor vérifie notamment:
+
+- présence de OPENAI_API_KEY
+- accès au modèle OpenAI configuré
+- présence des dossiers output et output/sections
+- compatibilité de la version Node (>= 20)
+- présence de fichiers de config attendus (`package.json`, `tsconfig.json`, `README.md`, `.github/workflows/ci.yml`)
+
+Le rapport JSON est versionné avec `reportVersion: 2` et `reportSchemaVersion: "1.1.0"`.
+
+Exemple d'utilisation du mode design system avec diagnostics fins :
+
+```bash
+npm run validate -- output/sections/hero.liquid --design-system --format=json
+```
+
+Le rapport inclut des `ruleId` détaillés, par exemple :
+
+- `schema.missing_tags`
+- `css.global_selector`
+- `js.global_document_access`
+- `ux.mobile_missing_media_rules`
+- `design_system.tokens_required`
 
 Compiler le projet :
 

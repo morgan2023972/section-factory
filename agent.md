@@ -84,6 +84,28 @@ When generating a section, follow this pipeline:
 
 ---
 
+## ✅ Validation Workflow (CLI validate)
+
+For validation-only tasks (without generation), use the dedicated CLI flow:
+
+1. Read an existing section file
+2. Run `npm run validate -- <file>`
+3. Optionally enable design rules with `--design-system` and `--profile`
+4. Use mode:
+
+- `--strict` (default)
+- `--non-strict` (selected diagnostics become warnings)
+
+5. Use `--format=json` for machine-readable reports
+
+Validation report conventions:
+
+- `reportVersion: 2`
+- `reportSchemaVersion: "1.1.0"`
+- diagnostics include granular `ruleId` (schema/css/js/mobile/design_system)
+
+---
+
 ## 🧩 Section Design Guidelines
 
 - Prefer flexibility over visual rigidity
