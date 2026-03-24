@@ -1,4 +1,5 @@
 [![CI](https://github.com/morgan2023972/section-factory/actions/workflows/ci.yml/badge.svg)](https://github.com/morgan2023972/section-factory/actions)
+[![codecov](https://codecov.io/gh/morgan2023972/section-factory/branch/main/graph/badge.svg)](https://codecov.io/gh/morgan2023972/section-factory)
 
 # Section Factory
 
@@ -166,6 +167,16 @@ Lancer les tests en mode watch :
 ```bash
 npm run test:watch
 ```
+
+## Coverage
+
+Generer le rapport de couverture de tests :
+
+```bash
+npm run coverage
+```
+
+Les rapports sont generes dans le dossier `coverage/` (text, json, html, lcov).
 
 ## Workflow d'équipe
 
