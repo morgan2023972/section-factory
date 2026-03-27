@@ -5,6 +5,7 @@ import {
   isKnownSectionType,
   getSectionTypeById,
 } from "../../src/core/section-types/registry";
+import { getSupportedSectionTypes } from "../../src/cli/generateSection";
 
 describe("section types registry", () => {
   it("getEnabledSectionTypes returns a non-empty array", () => {
@@ -19,12 +20,18 @@ describe("section types registry", () => {
 
     expect(ids).toEqual(
       expect.arrayContaining([
+        "before-after",
+        "comparison-table",
+        "featured-product",
+        "image-with-text",
+        "logo-cloud",
+        "newsletter",
+        "promo-banner",
+        "trust-badges",
         "hero",
         "faq",
         "testimonials",
         "product-grid",
-        "rich-text",
-        "image-banner",
       ]),
     );
   });
@@ -66,5 +73,12 @@ describe("section types registry", () => {
       expect(definition).toHaveProperty("supportsDesignSystem");
       expect(definition).toHaveProperty("enabled");
     }
+  });
+
+  it("keeps registry ids and CLI prompt builder types in sync", () => {
+    const registryIds = [...getSectionTypeIds()].sort();
+    const cliSupportedTypes = [...getSupportedSectionTypes()].sort();
+
+    expect(cliSupportedTypes).toEqual(registryIds);
   });
 });

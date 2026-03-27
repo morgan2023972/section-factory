@@ -29,11 +29,12 @@ import { buildPromoBannerPrompt } from "../prompts/promoBannerPrompt";
 import { shopifyRules } from "../prompts/shopifyRules";
 import { buildTestimonialsPrompt } from "../prompts/testimonialsPrompt";
 import { buildTrustBadgesPrompt } from "../prompts/trustBadgesPrompt";
+import { type SectionTypeId } from "../core/section-types/registry";
 
 dotenv.config();
 
 interface CliOptions {
-  sectionType: string;
+  sectionType: SectionTypeId;
   designSystem: DesignSystemOptions;
   maxRetries: number;
   validationMode: "strict" | "non-strict";
@@ -43,7 +44,7 @@ const DEFAULT_MAX_RETRIES = 2;
 
 type PromptBuilder = (designSystem: DesignSystemOptions) => string;
 
-const SECTION_PROMPT_BUILDERS: Record<string, PromptBuilder> = {
+const SECTION_PROMPT_BUILDERS: Record<SectionTypeId, PromptBuilder> = {
   hero: (designSystem) => buildHeroPrompt({ designSystem }),
   "featured-product": (designSystem) =>
     buildFeaturedProductPrompt({ designSystem }),
@@ -61,8 +62,14 @@ const SECTION_PROMPT_BUILDERS: Record<string, PromptBuilder> = {
     buildComparisonTablePrompt({ designSystem }),
 };
 
-function getSupportedSectionTypes(): string[] {
+export function getSupportedSectionTypes(): SectionTypeId[] {
   return Object.keys(SECTION_PROMPT_BUILDERS);
+}
+
+function isSupportedSectionType(
+  sectionType: string,
+): sectionType is SectionTypeId {
+  return sectionType in SECTION_PROMPT_BUILDERS;
 }
 
 function parseCliOptions(argv: string[]): CliOptions {
@@ -74,7 +81,7 @@ function parseCliOptions(argv: string[]): CliOptions {
       : "hero";
   const resolvedSectionType = resolveSectionType(sectionType);
 
-  if (!SECTION_PROMPT_BUILDERS[resolvedSectionType]) {
+  if (!isSupportedSectionType(resolvedSectionType)) {
     const supportedTypes = getSupportedSectionTypes().join(", ");
     throw new Error(
       `Unsupported section type \"${sectionType}\". Allowed types: ${supportedTypes}`,
@@ -171,18 +178,10 @@ function parseCliOptions(argv: string[]): CliOptions {
 }
 
 function buildPromptForType(
-  sectionType: string,
+  sectionType: SectionTypeId,
   designSystem: DesignSystemOptions,
 ): string {
-  const builder = SECTION_PROMPT_BUILDERS[sectionType];
-  if (!builder) {
-    const supportedTypes = getSupportedSectionTypes().join(", ");
-    throw new Error(
-      `Unsupported section type \"${sectionType}\". Allowed types: ${supportedTypes}`,
-    );
-  }
-
-  return builder(designSystem);
+  return SECTION_PROMPT_BUILDERS[sectionType](designSystem);
 }
 
 export interface CliRuntimeDeps {

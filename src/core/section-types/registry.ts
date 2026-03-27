@@ -1,10 +1,16 @@
 export type SectionTypeId =
+  | "before-after"
+  | "comparison-table"
+  | "featured-product"
+  | "image-with-text"
+  | "logo-cloud"
+  | "newsletter"
+  | "promo-banner"
+  | "trust-badges"
   | "hero"
   | "faq"
   | "testimonials"
-  | "product-grid"
-  | "rich-text"
-  | "image-banner";
+  | "product-grid";
 
 export interface SectionTypeDefinition {
   id: SectionTypeId;
@@ -16,6 +22,70 @@ export interface SectionTypeDefinition {
 }
 
 export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
+  {
+    id: "before-after",
+    label: "Before/After",
+    description: "Visual comparison slider between two images",
+    category: "media",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
+  {
+    id: "comparison-table",
+    label: "Comparison Table",
+    description: "Feature comparison table across products or plans",
+    category: "conversion",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
+  {
+    id: "featured-product",
+    label: "Featured Product",
+    description: "Spotlight for a single product with key details and CTA",
+    category: "catalog",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
+  {
+    id: "image-with-text",
+    label: "Image With Text",
+    description: "Image and text split layout for storytelling",
+    category: "content",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
+  {
+    id: "logo-cloud",
+    label: "Logo Cloud",
+    description: "Grid of partner or client logos",
+    category: "social-proof",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
+  {
+    id: "newsletter",
+    label: "Newsletter",
+    description: "Email signup section for audience capture",
+    category: "conversion",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
+  {
+    id: "promo-banner",
+    label: "Promo Banner",
+    description: "Promotional banner highlighting an offer or event",
+    category: "marketing",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
+  {
+    id: "trust-badges",
+    label: "Trust Badges",
+    description: "Reassurance badges and trust signals",
+    category: "social-proof",
+    supportsDesignSystem: true,
+    enabled: true,
+  },
   {
     id: "hero",
     label: "Hero",
@@ -45,22 +115,6 @@ export const SECTION_TYPE_REGISTRY: SectionTypeDefinition[] = [
     label: "Product Grid",
     description: "Grid of featured or selected products",
     category: "catalog",
-    supportsDesignSystem: true,
-    enabled: true,
-  },
-  {
-    id: "rich-text",
-    label: "Rich Text",
-    description: "Formatted text content section",
-    category: "content",
-    supportsDesignSystem: true,
-    enabled: true,
-  },
-  {
-    id: "image-banner",
-    label: "Image Banner",
-    description: "Large image section with overlay content",
-    category: "media",
     supportsDesignSystem: true,
     enabled: true,
   },
