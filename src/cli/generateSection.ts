@@ -63,7 +63,7 @@ const SECTION_PROMPT_BUILDERS: Record<SectionTypeId, PromptBuilder> = {
 };
 
 export function getSupportedSectionTypes(): SectionTypeId[] {
-  return Object.keys(SECTION_PROMPT_BUILDERS);
+  return Object.keys(SECTION_PROMPT_BUILDERS) as SectionTypeId[];
 }
 
 function isSupportedSectionType(
