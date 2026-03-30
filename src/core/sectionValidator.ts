@@ -1,12 +1,19 @@
 import { validateDesignSystemCompliance } from "./designSystemValidator";
+import {
+  runAstRuleRouter,
+  type AstValidationPhase,
+  type SectionValidationDiagnostic,
+} from "./validation/ruleRouter";
 
 export interface SectionValidationResult {
   isValid: boolean;
   errors: string[];
+  diagnostics?: SectionValidationDiagnostic[];
 }
 
 export interface SectionValidationOptions {
   designSystemEnabled?: boolean;
+  astValidationPhase?: AstValidationPhase;
 }
 
 function extractSchemaContent(sectionCode: string): string | null {
@@ -188,6 +195,7 @@ export function validateSectionCode(
   options?: SectionValidationOptions,
 ): SectionValidationResult {
   const errors: string[] = [];
+  const diagnostics: SectionValidationDiagnostic[] = [];
 
   if (!sectionCode || !sectionCode.trim()) {
     return {
@@ -242,6 +250,13 @@ export function validateSectionCode(
   validateMobileUx(cssContent, errors);
   validateComplexity(sectionCode, cssContent, jsContent, errors);
 
+  const astValidation = runAstRuleRouter(
+    sectionCode,
+    options?.astValidationPhase,
+  );
+  diagnostics.push(...astValidation.diagnostics);
+  errors.push(...astValidation.blockingErrors);
+
   if (options?.designSystemEnabled) {
     const designValidation = validateDesignSystemCompliance(sectionCode);
     errors.push(...designValidation.errors);
@@ -250,5 +265,6 @@ export function validateSectionCode(
   return {
     isValid: errors.length === 0,
     errors,
+    diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
   };
 }

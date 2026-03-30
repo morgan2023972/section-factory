@@ -62,6 +62,24 @@ describe("validate CLI options parser", () => {
     expect(options.mode).toBe("non-strict");
   });
 
+  it("enables AST advisory mode with --ast-validate", () => {
+    const options = parseValidateCliOptions([
+      "output/sections/hero.liquid",
+      "--ast-validate",
+    ]);
+
+    expect(options.astValidationPhase).toBe("advisory");
+  });
+
+  it("parses explicit AST phase", () => {
+    const options = parseValidateCliOptions([
+      "output/sections/hero.liquid",
+      "--ast-phase=block",
+    ]);
+
+    expect(options.astValidationPhase).toBe("block");
+  });
+
   it("throws on missing file path", () => {
     expect(() => parseValidateCliOptions([])).toThrow(/Missing file path/);
   });
@@ -84,6 +102,16 @@ describe("validate CLI options parser", () => {
         "fast",
       ]),
     ).toThrow(/Invalid mode/);
+  });
+
+  it("throws on invalid AST phase", () => {
+    expect(() =>
+      parseValidateCliOptions([
+        "output/sections/hero.liquid",
+        "--ast-phase",
+        "fast",
+      ]),
+    ).toThrow(/Invalid AST phase/);
   });
 });
 
@@ -232,5 +260,40 @@ describe("validate CLI runtime", () => {
     expect(parsed.summary.errors).toBe(0);
     expect(parsed.summary.warnings).toBe(1);
     expect(parsed.isValid).toBe(true);
+  });
+
+  it("includes AST diagnostics in hybrid JSON report", async () => {
+    const deps = createDeps({
+      validateSectionCodeFn: vi.fn(() => ({
+        isValid: true,
+        errors: [],
+        diagnostics: [
+          {
+            source: "ast-light-v1",
+            ruleId: "ast.a11y.image_alt_missing",
+            path: "markup",
+            severity: "warning",
+            message: "AST check: image tag without alt attribute detected.",
+            confidence: "medium",
+          },
+        ],
+      })),
+    });
+
+    const exitCode = await runValidateCli(
+      ["output/sections/hero.liquid", "--ast-validate", "--format", "json"],
+      deps,
+    );
+
+    expect(exitCode).toBe(0);
+    const jsonOutput = (deps.log as ReturnType<typeof vi.fn>).mock
+      .calls[0][0] as string;
+    const parsed = JSON.parse(jsonOutput) as ReturnType<
+      typeof buildValidationReport
+    >;
+    expect(parsed.engine).toBe("hybrid-v1");
+    expect(parsed.summary.warnings).toBe(1);
+    expect(parsed.diagnostics[0].source).toBe("shopify-validator-ast-v1");
+    expect(parsed.diagnostics[0].ruleId).toBe("ast.a11y.image_alt_missing");
   });
 });

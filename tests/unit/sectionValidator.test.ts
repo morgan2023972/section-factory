@@ -178,4 +178,24 @@ describe("section validator", () => {
       ),
     ).toBe(false);
   });
+
+  it("reports AST advisory diagnostics without blocking validation", () => {
+    const codeWithImageMissingAlt = makeValidSectionCode().replace(
+      "<h2>{{ section.settings.heading }}</h2>",
+      '<h2>{{ section.settings.heading }}</h2>\n  <img src="/test.jpg">',
+    );
+
+    const result = validateSectionCode(codeWithImageMissingAlt, {
+      astValidationPhase: "advisory",
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.diagnostics?.length).toBeGreaterThan(0);
+    expect(
+      result.diagnostics?.some(
+        (diagnostic) => diagnostic.ruleId === "ast.a11y.image_alt_missing",
+      ),
+    ).toBe(true);
+  });
 });

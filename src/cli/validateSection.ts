@@ -2,8 +2,10 @@ import * as dotenv from "dotenv";
 import * as fs from "fs-extra";
 import {
   validateSectionCode,
+  type SectionValidationDiagnostic,
   type SectionValidationResult,
 } from "../core/sectionValidator";
+import { type AstValidationPhase } from "../core/validation/ruleRouter";
 import {
   DESIGN_PROFILE_NAMES,
   resolveDesignProfileName,
@@ -20,10 +22,11 @@ export interface ValidateCliOptions {
   profile?: string;
   format: ValidateOutputFormat;
   mode: ValidateMode;
+  astValidationPhase: AstValidationPhase;
 }
 
 export interface ValidationDiagnostic {
-  source: "shopify-validator-v1";
+  source: "shopify-validator-v1" | "shopify-validator-ast-v1";
   ruleId: string;
   path: string;
   severity: "error" | "warning";
@@ -34,7 +37,7 @@ export interface ValidationDiagnostic {
 export interface ValidationReport {
   reportVersion: 2;
   reportSchemaVersion: "1.1.0";
-  engine: "regex-v1";
+  engine: "regex-v1" | "hybrid-v1";
   mode: ValidateMode;
   filePath: string;
   isValid: boolean;
@@ -50,7 +53,10 @@ export interface ValidateCliRuntimeDeps {
   readFileFn: (filePath: string) => Promise<string>;
   validateSectionCodeFn: (
     sectionCode: string,
-    options?: { designSystemEnabled?: boolean },
+    options?: {
+      designSystemEnabled?: boolean;
+      astValidationPhase?: AstValidationPhase;
+    },
   ) => SectionValidationResult;
   log: (message: string) => void;
   error: (message: string) => void;
@@ -76,10 +82,32 @@ function usageText(): string {
     "  --mode=<strict|non-strict> Validation mode (inline form)",
     "  --strict                 Shortcut for --mode strict",
     "  --non-strict             Shortcut for --mode non-strict",
+    "  --ast-validate           Enable AST-light advisory validation",
+    "  --ast-phase <off|advisory|warn|block> AST validation phase (default: off)",
+    "  --ast-phase=<off|advisory|warn|block> AST validation phase (inline form)",
     "  --format <text|json>     Output format (default: text)",
     "  --format=<text|json>     Output format (inline form)",
     "  --help                   Show this help",
   ].join("\n");
+}
+
+function parseAstPhaseValue(
+  input: string | undefined,
+): AstValidationPhase | null {
+  if (!input) {
+    return null;
+  }
+
+  if (
+    input === "off" ||
+    input === "advisory" ||
+    input === "warn" ||
+    input === "block"
+  ) {
+    return input;
+  }
+
+  return null;
 }
 
 function parseModeValue(input: string | undefined): ValidateMode | null {
@@ -101,6 +129,7 @@ export function parseValidateCliOptions(argv: string[]): ValidateCliOptions {
   let profileInput: string | undefined;
   let format: ValidateOutputFormat = "text";
   let mode: ValidateMode = "strict";
+  let astValidationPhase: AstValidationPhase = "off";
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
@@ -117,6 +146,40 @@ export function parseValidateCliOptions(argv: string[]): ValidateCliOptions {
     if (arg === "--design-system") {
       designSystemEnabled = true;
       continue;
+    }
+
+    if (arg === "--ast-validate") {
+      if (astValidationPhase === "off") {
+        astValidationPhase = "advisory";
+      }
+      continue;
+    }
+
+    if (arg === "--ast-phase") {
+      const phaseValue = args[i + 1];
+      i += 1;
+      const parsedPhase = parseAstPhaseValue(phaseValue);
+      if (parsedPhase) {
+        astValidationPhase = parsedPhase;
+        continue;
+      }
+
+      throw new Error(
+        `Invalid AST phase "${phaseValue}". Allowed phases: off, advisory, warn, block`,
+      );
+    }
+
+    if (arg.startsWith("--ast-phase=")) {
+      const phaseValue = arg.split("=")[1];
+      const parsedPhase = parseAstPhaseValue(phaseValue);
+      if (parsedPhase) {
+        astValidationPhase = parsedPhase;
+        continue;
+      }
+
+      throw new Error(
+        `Invalid AST phase "${phaseValue}". Allowed phases: off, advisory, warn, block`,
+      );
     }
 
     if (arg === "--strict") {
@@ -219,6 +282,23 @@ export function parseValidateCliOptions(argv: string[]): ValidateCliOptions {
     profile,
     format,
     mode,
+    astValidationPhase,
+  };
+}
+
+function mapAstDiagnosticToDiagnostic(
+  diagnostic: SectionValidationDiagnostic,
+): ValidationDiagnostic {
+  return {
+    source: "shopify-validator-ast-v1",
+    ruleId: diagnostic.ruleId,
+    path: diagnostic.path,
+    severity: diagnostic.severity,
+    message: diagnostic.message,
+    suggestion:
+      diagnostic.severity === "error"
+        ? "Apply AST validation recommendation and regenerate the section."
+        : "Review this AST advisory warning and decide if remediation is needed.",
   };
 }
 
@@ -539,8 +619,14 @@ export function buildValidationReport(
   validation: SectionValidationResult,
   mode: ValidateMode,
 ): ValidationReport {
+  const regexDiagnostics = validation.errors.map((error) =>
+    mapErrorToDiagnostic(error),
+  );
+  const astDiagnostics = (validation.diagnostics ?? []).map((diagnostic) =>
+    mapAstDiagnosticToDiagnostic(diagnostic),
+  );
   const diagnostics = applyValidationMode(
-    validation.errors.map((error) => mapErrorToDiagnostic(error)),
+    [...regexDiagnostics, ...astDiagnostics],
     mode,
   );
   const errorCount = diagnostics.filter(
@@ -553,7 +639,7 @@ export function buildValidationReport(
   return {
     reportVersion: 2,
     reportSchemaVersion: "1.1.0",
-    engine: "regex-v1",
+    engine: astDiagnostics.length > 0 ? "hybrid-v1" : "regex-v1",
     mode,
     filePath,
     isValid: errorCount === 0,
@@ -625,6 +711,7 @@ export async function runValidateCli(
 
   const validation = deps.validateSectionCodeFn(fileContent, {
     designSystemEnabled: options.designSystemEnabled,
+    astValidationPhase: options.astValidationPhase,
   });
   const report = buildValidationReport(
     options.filePath,

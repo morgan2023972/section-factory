@@ -6,6 +6,10 @@ import {
 } from "./prompts/designSystemProfiles";
 import { getEnabledSectionTypes } from "./core/section-types/registry";
 import { getAliasesForSectionType } from "./cli/sectionTypeMapping";
+import {
+  AST_RULE_CONFIG_ENV_VAR,
+  getAstRulePolicySnapshot,
+} from "./core/validation/astRuleConfig";
 
 dotenv.config();
 
@@ -60,19 +64,53 @@ function handleListProfilesCommand(log: (message: string) => void): void {
   }
 }
 
+function handleShowAstPolicyCommand(log: (message: string) => void): void {
+  const snapshot = getAstRulePolicySnapshot();
+
+  log(
+    JSON.stringify(
+      {
+        source: "ast-policy-runtime",
+        configPath: snapshot.configPath,
+        loadedFromEnv: snapshot.loadedFromEnv,
+        envVar: AST_RULE_CONFIG_ENV_VAR,
+        ruleCount: Object.keys(snapshot.policies).length,
+        policies: snapshot.policies,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
 export function startFactory(argv: string[] = process.argv): void {
-  if (hasArg("--list-sections", argv) || hasArg("--list-section", argv)) {
+  if (hasArg("--list-sections", argv)) {
     handleListSectionsCommand(console.log);
     return;
   }
 
+  if (hasArg("--list-section", argv)) {
+    console.error(
+      'Unsupported option: "--list-section" was removed. Use "--list-sections" instead.',
+    );
+    return;
+  }
+
   if (hasArg("--list-types", argv)) {
+    console.warn(
+      'Deprecation warning: "--list-types" will be removed in 2 releases. Use "--list-sections" instead.',
+    );
     handleListSectionsCommand(console.log);
     return;
   }
 
   if (hasArg("--list-profiles", argv)) {
     handleListProfilesCommand(console.log);
+    return;
+  }
+
+  if (hasArg("--show-ast-policy", argv)) {
+    handleShowAstPolicyCommand(console.log);
     return;
   }
 

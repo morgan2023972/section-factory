@@ -19,6 +19,11 @@ Section Factory est un projet TypeScript pour générer et valider des sections 
 - Commande CLI --list-sections (commande dediee)
 - Commande CLI --list-profiles
 - Commande CLI validate dédiée (validation séparée de la génération)
+- Commande CLI optimize dédiée (assistant d optimisation MVP)
+- Critere de succes optimizer par axe (taille, securite, structure)
+- Validation AST-light progressive sur la commande validate (off/advisory/warn/block)
+- Configuration runtime des politiques AST via JSON externe (sans rebuild)
+- Commande CLI de diagnostic des politiques AST effectives
 - Commande CLI doctor pour vérifier la santé de l'environnement
 - Mapping de diagnostics validate avec ruleId fins (schema, css, js, mobile, design_system)
 - Tests unitaires avec Vitest
@@ -63,11 +68,27 @@ Compatibilite legacy :
 npm run dev -- --list-types
 ```
 
+Note: `--list-types` est deprecie et sera retire dans 2 releases. Utilisez `--list-sections`.
+
 Lister les profils design disponibles :
 
 ```bash
 npm run dev -- --list-profiles
 ```
+
+Afficher la politique AST effective chargee au runtime :
+
+```bash
+npm run dev -- --show-ast-policy
+```
+
+Cette commande affiche un JSON de diagnostic avec:
+
+- configPath (chemin effectivement resolu)
+- loadedFromEnv (si la variable SECTION_FACTORY_AST_RULE_CONFIG est utilisee)
+- envVar
+- ruleCount
+- policies (politique effective chargee)
 
 Generer une section hero (validation non-strict par defaut) :
 
@@ -102,6 +123,30 @@ Valider une section existante sans génération :
 npm run validate -- output/sections/hero.liquid
 ```
 
+Optimiser une section existante (rapport uniquement par defaut) :
+
+```bash
+npm run optimize -- output/sections/hero.liquid
+```
+
+Exiger un gain taille minimum pour valider l axe compression/cleanup :
+
+```bash
+npm run optimize -- output/sections/hero.liquid --size-threshold=8
+```
+
+Optimiser puis ecrire la version optimisee dans un fichier de sortie :
+
+```bash
+npm run optimize -- output/sections/hero.liquid --write --output output/sections/hero.optimized.liquid
+```
+
+Le rapport optimize expose des criteres de succes independants:
+
+- Taille: succes si gain >= seuil configure (`--size-threshold`, defaut 5)
+- Securite: succes si le nombre de patterns risques diminue
+- Structure: succes si au moins une regle de conformite est appliquee
+
 Valider en mode non-strict (certaines règles deviennent des warnings) :
 
 ```bash
@@ -112,6 +157,21 @@ Valider avec sortie JSON (préparation CI/outillage) :
 
 ```bash
 npm run validate -- output/sections/hero.liquid --format=json
+```
+
+Activer les diagnostics AST-light en advisory (non bloquants) :
+
+```bash
+npm run validate -- output/sections/hero.liquid --ast-validate
+```
+
+Choisir explicitement la phase AST :
+
+```bash
+npm run validate -- output/sections/hero.liquid --ast-phase=off
+npm run validate -- output/sections/hero.liquid --ast-phase=advisory
+npm run validate -- output/sections/hero.liquid --ast-phase=warn
+npm run validate -- output/sections/hero.liquid --ast-phase=block
 ```
 
 Vérifier l'environnement avec doctor :
@@ -134,7 +194,9 @@ Le doctor vérifie notamment:
 - compatibilité de la version Node (>= 20)
 - présence de fichiers de config attendus (`package.json`, `tsconfig.json`, `README.md`, `.github/workflows/ci.yml`)
 
-Le rapport JSON est versionné avec `reportVersion: 2` et `reportSchemaVersion: "1.1.0"`.
+Le rapport JSON de doctor contient l'etat de sante (`isHealthy`), un resume (`summary`) et la liste des checks (`checks`).
+
+Le rapport JSON versionne (`reportVersion: 2` et `reportSchemaVersion: "1.1.0"`) concerne la commande validate.
 
 Exemple d'utilisation du mode design system avec diagnostics fins :
 
@@ -149,6 +211,14 @@ Le rapport inclut des `ruleId` détaillés, par exemple :
 - `js.global_document_access`
 - `ux.mobile_missing_media_rules`
 - `design_system.tokens_required`
+
+Quand AST-light est activé, le rapport JSON passe en moteur `hybrid-v1` (sinon `regex-v1`) et ajoute des diagnostics AST (source `shopify-validator-ast-v1`).
+
+Configuration runtime des politiques AST:
+
+- Fichier par defaut: config/ast-rule-policies.json
+- Variable d environnement optionnelle: SECTION_FACTORY_AST_RULE_CONFIG (chemin vers un JSON externe)
+- Permet d ajuster les severites par `ruleId` et par phase (`advisory`, `warn`, `block`) sans rebuild TypeScript
 
 Compiler le projet :
 

@@ -22,21 +22,32 @@ Le projet est organise autour de 4 couches:
 3. Prompts de generation
 4. Qualite (tests + CI)
 
+Un sous-projet annexe existe pour MCP Shopify:
+
+- MCP-doc-shopify/
+  - Serveur MCP dedie a des outils de documentation Shopify
+  - Independant du runtime principal
+
 ## Structure des dossiers
 
 - src/index.ts
   - Point d entree principal
-  - Gere les commandes de discovery CLI (`--list-sections`, `--list-profiles`)
+  - Gere les commandes de discovery CLI (`--list-sections`, `--list-profiles`, `--show-ast-policy`)
 
 - src/cli/
   - Scripts CLI specialises
   - `generateSection.ts`: generation + retry
+  - `optimizeSection.ts`: assistant d optimisation (rapport-only par defaut)
   - `validateSection.ts`: validation seule (report text/json)
   - `doctor.ts`: checks environnement (env, modele, dossiers, config, runtime)
 
 - src/core/
   - Logique metier principale
   - Validation, construction, generation, regles design
+
+- src/core/sectionOptimizer/
+  - Pipeline d optimisation MVP
+  - Nettoyage, minification conservative, suggestions de reutilisabilite et audit cross-theme
 
 - src/core/section-types/registry.ts
   - Registre central des types de sections
@@ -46,6 +57,21 @@ Le projet est organise autour de 4 couches:
   - Validation des sections generees
   - Modes strict et non-strict
   - Depend du registre central (pas de liste locale)
+
+- src/core/validation/ruleRouter.ts
+  - Routeur de regles AST-light (phases: off, advisory, warn, block)
+  - Agrege les diagnostics AST et determine les erreurs bloquantes
+
+- src/core/validation/astRuleConfig.ts
+  - Configuration des regles AST par phase et severite
+  - Permet de regler warning/error/off/auto par ruleId sans modifier le routeur
+  - Supporte la surcharge runtime via JSON externe et variable d environnement
+
+- src/core/validation/parsers/
+  - parseurs AST-light specialises:
+  - cssAst.ts
+  - jsAst.ts
+  - htmlAst.ts
 
 - src/prompts/
   - Prompts specialises par type de section
@@ -107,10 +133,16 @@ Commande implementee:
 
 - --list-sections
   - Lit getEnabledSectionTypes() depuis le registre
-  - Affiche id, label, category, description
+  - Affiche type, alias, description, design-system
+- --list-types
+  - Alias legacy de --list-sections
+  - Deprecie: suppression prevue dans 2 releases
 - --list-profiles
   - Lit les profils design system disponibles
   - Affiche profil + resume et profil par defaut
+- --show-ast-policy
+  - Affiche la politique AST effective chargee au runtime
+  - Inclut chemin de config, source env, nombre de regles et politiques resolues
 
 Fichier: src/cli/generateSection.ts
 
@@ -119,13 +151,30 @@ Fichier: src/cli/generateSection.ts
 - Validation non-strict par defaut pendant la generation
 - Supporte `--strict` pour rendre les regles de generation bloquantes
 
+Fichier: src/cli/optimizeSection.ts
+
+- Commande `npm run optimize -- <file> [options]`
+- Mode par defaut: rapport uniquement (pas d ecriture disque)
+- Supporte `--size-threshold` pour regler le seuil de succes taille
+- Supporte `--write` et `--output` pour exporter le code optimise
+- Retourne `0` (succes), `1` (issues safety high), `2` (erreur usage/IO)
+
+Succes optimizer (par axe, non global):
+
+- Taille: succes si le gain compression/cleanup est superieur ou egal au seuil configure
+- Securite: succes si des patterns risques sont effectivement supprimes
+- Structure: succes si au moins une regle de conformite est appliquee
+
 Fichier: src/cli/validateSection.ts
 
 - Commande `npm run validate -- <file> [options]`
 - Valide un fichier section existant sans generation IA
 - Supporte `--mode strict|non-strict` et `--format text|json`
+- Supporte `--ast-validate` et `--ast-phase off|advisory|warn|block`
 - Produit un rapport versionne (`reportVersion`, `reportSchemaVersion`)
-- Retourne des diagnostics avec `ruleId` fins pour preparer la migration AST
+- Retourne un moteur `regex-v1` (par defaut) ou `hybrid-v1` (si AST active)
+- Retourne des diagnostics avec `ruleId` fins (regex + AST)
+- Retourne `0` (valide), `1` (invalide), `2` (erreur usage/lecture)
 
 Fichier: src/cli/doctor.ts
 
@@ -137,6 +186,8 @@ Fichier: src/cli/doctor.ts
   - dossiers output attendus
   - version Node compatible
   - presence des fichiers de config attendus
+- Probe OpenAI via Responses API avec `max_output_tokens: 16`
+- Retourne `0` (sain), `1` (checks en echec), `2` (erreur usage)
 
 ## Flux principal (simplifie)
 
@@ -153,10 +204,16 @@ Fichier: src/cli/doctor.ts
 - Cibles actuelles:
   - Registre des types
   - CLI index (list-sections/list-profiles)
-  - CLI generate (integration)
-  - CLI validate (unit + integration)
+  - CLI validate (unit)
+  - CLI doctor (unit)
   - Validator design
   - Validator Shopify
+
+### Tests d integration
+
+- CLI generate
+- CLI validate
+- CLI doctor
 
 Scripts npm:
 
@@ -178,6 +235,7 @@ Etapes:
 - TypeScript strict pour limiter les regressions
 - Registre central pour les types supportes
 - Validation dissociee de la CLI
+- Activation progressive AST-light pour limiter les faux positifs
 - Tests unitaires orientes comportement
 
 ## Extension future recommandee

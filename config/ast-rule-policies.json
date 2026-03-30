@@ -1,0 +1,32 @@
+{
+  "ast.css.section_id_required": {
+    "block": "error"
+  },
+  "ast.css.scope_selector_required": {
+    "block": "error"
+  },
+  "ast.js.global_document_access": {
+    "block": "error"
+  },
+  "ast.js.global_window_access": {
+    "block": "error"
+  },
+  "ast.js.global_add_event_listener": {
+    "block": "warning"
+  },
+  "ast.css.global_selector": {
+    "block": "warning"
+  },
+  "ast.css.parse_failure": {
+    "block": "warning"
+  },
+  "ast.js.parse_failure": {
+    "block": "warning"
+  },
+  "ast.a11y.heading_missing": {
+    "block": "warning"
+  },
+  "ast.a11y.image_alt_missing": {
+    "block": "warning"
+  }
+}

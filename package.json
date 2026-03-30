@@ -7,6 +7,7 @@
     "dev": "tsx src/index.ts",
     "list-sections": "tsx src/index.ts --list-sections",
     "generate": "tsx src/cli/generateSection.ts",
+    "optimize": "tsx src/cli/optimizeSection.ts",
     "validate": "tsx src/cli/validateSection.ts",
     "doctor": "tsx src/cli/doctor.ts",
     "build": "tsc",
@@ -17,9 +18,14 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "acorn": "^8.16.0",
+    "acorn-walk": "^8.3.5",
     "dotenv": "^16.4.5",
     "fs-extra": "^11.2.0",
-    "openai": "^4.104.0"
+    "htmlparser2": "^12.0.0",
+    "openai": "^4.104.0",
+    "postcss": "^8.5.8",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
