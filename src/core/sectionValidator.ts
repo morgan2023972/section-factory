@@ -268,3 +268,5 @@ export function validateSectionCode(
     diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
   };
 }
+
+export type { SectionValidationDiagnostic };
