@@ -359,6 +359,17 @@ Regles:
 - presence tokens CSS custom properties
 - style bouton scope sous .section-{{ section.id }}
 
+Contrat de sortie:
+
+- isValid: booleen de validite globale
+- issues: liste structuree `{ path, message }`
+- errors: liste legacy (messages) derivee de `issues` pour compatibilite
+
+Robustesse:
+
+- le validator accepte une entree `unknown`
+- aucune exception n est levee sur des entrees inattendues (null/undefined/mauvais type)
+
 ### 6.8 Injection design system
 
 Fichier: src/core/designSystemInjector.ts
@@ -426,6 +437,7 @@ Tests detects:
 Unit:
 
 - tests/unit/designValidator.test.ts
+- tests/unit/designSystemValidator.test.ts
 - tests/unit/doctor.cli.test.ts
 - tests/unit/index.cli.test.ts
 - tests/unit/optimizeSection.cli.test.ts
@@ -569,3 +581,37 @@ Resultats de validation:
   - 71.91% branches
   - 76.28% functions
   - 78.60% lines
+
+## 17. Journal de mise a jour (2026-04-01 - designSystemValidator)
+
+Contexte:
+
+- objectif: ajouter une couverture unitaire minimale mais robuste pour le validator design system
+- contrainte: peu de tests, forte valeur, non-fragiles, et comportement non-throw sur entrees inattendues
+
+Actions executees:
+
+1. ajout d une suite unitaire ciblee dans `tests/unit/designSystemValidator.test.ts`
+2. hardening minimal de `src/core/designSystemValidator.ts` pour accepter `unknown`
+3. structuration des erreurs avec `issues[]` (`path`, `message`) en gardant `errors[]` pour compatibilite
+
+Couverture de scenarios:
+
+- cas valide minimal
+- cas valide complet
+- null / undefined / mauvais type global
+- objet vide
+- au moins 2 regles requises manquantes
+- au moins 2 patterns invalides
+- verification du contrat de sortie (`isValid`, `issues`, `path`, `message`)
+- robustesse: absence de throw sur entrees inattendues
+
+Resultats de validation:
+
+- nouveau fichier: `tests/unit/designSystemValidator.test.ts` (8 tests)
+- suite complete: 17 fichiers, 127 tests passants
+- couverture module `src/core/designSystemValidator.ts`: 100% statements, 100% branches, 100% lines
+
+Commit associe:
+
+- `a961547` test(core): add focused Vitest coverage for designSystemValidator
