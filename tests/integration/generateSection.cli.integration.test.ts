@@ -160,6 +160,85 @@ describe("CLI integration - generateSection", () => {
     );
   });
 
+  it("passes --max-retries value to retry flow and succeeds on last allowed attempt", async () => {
+    const deps = createDeps();
+    deps.generateSectionFn = vi
+      .fn()
+      .mockResolvedValueOnce("initial-invalid")
+      .mockResolvedValueOnce("retry-invalid")
+      .mockResolvedValueOnce("retry-valid");
+    deps.validateSectionCodeFn = vi
+      .fn()
+      .mockReturnValueOnce({
+        isValid: false,
+        errors: ["Schema JSON is invalid."],
+      })
+      .mockReturnValueOnce({
+        isValid: false,
+        errors: ["Schema JSON is invalid."],
+      })
+      .mockReturnValueOnce({
+        isValid: true,
+        errors: [],
+      });
+
+    const exitCode = await runCli(["hero", "--max-retries", "2"], deps);
+
+    expect(exitCode).toBe(0);
+    expect(deps.generateSectionFn).toHaveBeenCalledTimes(3);
+    expect(deps.log).toHaveBeenCalledWith(
+      "Validation failed. Starting retry correction (max 2 attempts).",
+    );
+    expect(deps.writeSectionToDiskFn).toHaveBeenCalledWith(
+      "hero",
+      "retry-valid",
+    );
+  });
+
+  it("fails when retries are exhausted and prints final blocking issues", async () => {
+    const deps = createDeps();
+    deps.generateSectionFn = vi
+      .fn()
+      .mockResolvedValueOnce("initial-invalid")
+      .mockResolvedValueOnce("retry-invalid-1")
+      .mockResolvedValueOnce("retry-invalid-2");
+    deps.validateSectionCodeFn = vi.fn(() => ({
+      isValid: false,
+      errors: ["Schema JSON is invalid."],
+    }));
+
+    const exitCode = await runCli(["hero", "--max-retries", "2"], deps);
+
+    expect(exitCode).toBe(1);
+    expect(deps.generateSectionFn).toHaveBeenCalledTimes(3);
+    expect(deps.error).toHaveBeenCalledWith(
+      "Validation failed after retry attempts:",
+    );
+    expect(deps.error).toHaveBeenCalledWith(
+      "- section: Schema JSON is invalid.",
+    );
+    expect(deps.writeSectionToDiskFn).not.toHaveBeenCalled();
+  });
+
+  it("treats --max-retries 0 as no retry and fails immediately", async () => {
+    const deps = createDeps();
+    deps.generateSectionFn = vi.fn().mockResolvedValueOnce("invalid-code");
+    deps.validateSectionCodeFn = vi.fn(() => ({
+      isValid: false,
+      errors: ["Schema JSON is invalid."],
+    }));
+
+    const exitCode = await runCli(["hero", "--max-retries", "0"], deps);
+
+    expect(exitCode).toBe(1);
+    expect(deps.generateSectionFn).toHaveBeenCalledTimes(1);
+    expect(deps.error).toHaveBeenCalledWith("Validation failed:");
+    expect(deps.error).toHaveBeenCalledWith("- Schema JSON is invalid.");
+    expect(deps.log).not.toHaveBeenCalledWith(
+      "Validation failed. Starting retry correction (max 0 attempts).",
+    );
+  });
+
   it("throws for unsupported section type", async () => {
     const deps = createDeps();
 
