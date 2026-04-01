@@ -145,6 +145,23 @@ describe("retryGenerator", () => {
     }
   });
 
+  it("retryGenerateSection maps non-Error exceptions to a generic message", async () => {
+    const result = await retryGenerateSection(
+      createBaseParams({
+        maxRetries: 1,
+        generateCorrection: vi.fn(async () => {
+          throw "network-down";
+        }),
+      }),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.attempts).toHaveLength(1);
+    expect(result.attempts[0]?.errorMessage).toBe(
+      "Unknown error while calling AI correction service.",
+    );
+  });
+
   it("retryGenerateSection normalizes malformed issues from validator", async () => {
     const result = await retryGenerateSection(
       createBaseParams({
@@ -222,5 +239,34 @@ describe("retryGenerator", () => {
     );
 
     expect(result.attempts).toHaveLength(2);
+  });
+
+  it("retryGenerateSection seeds fallback issue when initial issues are empty", async () => {
+    const result = await retryGenerateSection(
+      createBaseParams({
+        originalCode: "",
+        issues: [],
+        maxRetries: 1,
+        generateCorrection: vi.fn(async () => {
+          throw new Error("still invalid");
+        }),
+      }),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.attempts).toHaveLength(1);
+    expect(result.attempts[0]?.inputCode).toBe("");
+    expect(result.attempts[0]?.issues).toEqual([
+      {
+        path: "unknown",
+        message: "Validation failed, but no detailed issues were provided.",
+      },
+    ]);
+    expect(result.lastIssues).toEqual([
+      {
+        path: "unknown",
+        message: "Validation failed, but no detailed issues were provided.",
+      },
+    ]);
   });
 });

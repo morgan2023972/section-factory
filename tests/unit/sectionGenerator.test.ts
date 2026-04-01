@@ -93,6 +93,15 @@ describe("sectionGenerator", () => {
     );
   });
 
+  it("throws wrapped error when OpenAI response has no output_text", async () => {
+    process.env.OPENAI_API_KEY = "sk-test";
+    createResponseMock.mockResolvedValueOnce({});
+
+    await expect(generateSection("build section")).rejects.toThrow(
+      "Failed to generate section: OpenAI returned an empty response.",
+    );
+  });
+
   it("wraps provider Error with Failed to generate section prefix", async () => {
     process.env.OPENAI_API_KEY = "sk-test";
     createResponseMock.mockRejectedValueOnce(new Error("quota exceeded"));
