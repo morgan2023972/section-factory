@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { validateDesignSystemCompliance } from "../../src/core/designSystemValidator";
 
-function makeValidSectionCodeMinimal(): string {
+function makeCompliantSectionCode(): string {
   return `
 <div class="section-{{ section.id }}">
   <button class="btn">Shop now</button>
@@ -20,129 +20,136 @@ function makeValidSectionCodeMinimal(): string {
 `.trim();
 }
 
-function makeValidSectionCodeRich(): string {
+function makeWithoutStyleBlock(): string {
   return `
 <div class="section-{{ section.id }}">
-  <button class="btn">Learn more</button>
+  <button class="btn">Only markup</button>
 </div>
-<style>
-.section-{{ section.id }} button {
-  --color-primary: #222;
-  --space-md: 12px;
-  animation: pulse 1.2s ease-in-out;
-}
-@keyframes pulse {
-  0% { opacity: 0.9; }
-  100% { opacity: 1; }
-}
-@media (max-width: 989px) {
-  .section-{{ section.id }} button {
-    padding: var(--space-md);
-  }
-}
-</style>
 `.trim();
 }
 
-function expectInvalidResult(
-  result: ReturnType<typeof validateDesignSystemCompliance>,
-): void {
-  expect(result.isValid).toBe(false);
-  expect(result.issues.length).toBeGreaterThan(0);
-}
-
-describe("designSystemValidator", () => {
-  it("returns valid for a minimal valid payload", () => {
-    const result = validateDesignSystemCompliance(
-      makeValidSectionCodeMinimal(),
-    );
-
-    expect(result.isValid).toBe(true);
-    expect(result.issues).toHaveLength(0);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it("returns valid for a richer valid payload", () => {
-    const result = validateDesignSystemCompliance(makeValidSectionCodeRich());
-
-    expect(result.isValid).toBe(true);
-    expect(result.issues).toHaveLength(0);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it("handles null undefined and wrong global type without throwing", () => {
-    const invalidInputs: unknown[] = [
-      null,
-      undefined,
-      42,
-      "",
-      true,
-      { foo: "bar" },
-    ];
-
-    for (const value of invalidInputs) {
-      expect(() => validateDesignSystemCompliance(value)).not.toThrow();
-      const result = validateDesignSystemCompliance(value);
-      expectInvalidResult(result);
-    }
-  });
-
-  it("returns invalid for empty object", () => {
-    const result = validateDesignSystemCompliance({});
-
-    expectInvalidResult(result);
-  });
-
-  it("reports at least two missing required rules", () => {
-    const missingRequiredRules = `
+function makeWithoutMedia(): string {
+  return `
 <style>
-.section-{{ section.id }} .btn {
-  --color-primary: #000;
+.section-{{ section.id }} button {
+  --color-primary: #111;
   transition: color 0.2s ease;
 }
 </style>
 `.trim();
+}
 
-    const result = validateDesignSystemCompliance(missingRequiredRules);
-
-    expect(result.isValid).toBe(false);
-    expect(result.issues.some((issue) => issue.path === "style.@media")).toBe(
-      true,
-    );
-    expect(
-      result.issues.some((issue) => issue.path === "style.buttonScope"),
-    ).toBe(true);
-  });
-
-  it("reports at least two invalid field patterns", () => {
-    const invalidPatterns = `
+function makeWithoutMotion(): string {
+  return `
 <style>
-.section-{{ section.id }} .title {
-  color: red;
+.section-{{ section.id }} button {
+  --color-primary: #111;
 }
 @media (max-width: 749px) {
-  .section-{{ section.id }} .title {
-    color: blue;
+  .section-{{ section.id }} button {
+    color: var(--color-primary);
   }
 }
 </style>
 `.trim();
+}
 
-    const result = validateDesignSystemCompliance(invalidPatterns);
+function makeWithoutTokens(): string {
+  return `
+<style>
+.section-{{ section.id }} button {
+  transition: color 0.2s ease;
+}
+@media (max-width: 749px) {
+  .section-{{ section.id }} button {
+    color: #111;
+  }
+}
+</style>
+`.trim();
+}
 
-    expect(result.isValid).toBe(false);
-    expect(result.issues.some((issue) => issue.path === "style.motion")).toBe(
-      true,
-    );
-    expect(result.issues.some((issue) => issue.path === "style.tokens")).toBe(
-      true,
-    );
+function makeWithoutScopedButton(): string {
+  return `
+<style>
+.section-{{ section.id }} .title {
+  --color-primary: #111;
+  transition: color 0.2s ease;
+}
+@media (max-width: 749px) {
+  .section-{{ section.id }} .title {
+    color: var(--color-primary);
+  }
+}
+</style>
+`.trim();
+}
+
+function expectIssuePath(
+  result: ReturnType<typeof validateDesignSystemCompliance>,
+  path: string,
+): void {
+  expect(result.issues.some((issue) => issue.path === path)).toBe(true);
+}
+
+describe("designSystemValidator", () => {
+  it("returns valid for complete compliant section code", () => {
+    const result = validateDesignSystemCompliance(makeCompliantSectionCode());
+
+    expect(result.isValid).toBe(true);
+    expect(result.issues).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it("returns consistent result and issue shape", () => {
-    const result = validateDesignSystemCompliance(
-      "<style>.btn { color: red; }</style>",
-    );
+  it("returns invalid for non-string inputs without throwing", () => {
+    const nonStringInputs: unknown[] = [null, undefined, 42, {}, []];
+
+    for (const value of nonStringInputs) {
+      expect(() => validateDesignSystemCompliance(value)).not.toThrow();
+      const result = validateDesignSystemCompliance(value);
+      expect(result.isValid).toBe(false);
+      expect(result.issues.length).toBeGreaterThan(0);
+      expectIssuePath(result, "sectionCode");
+    }
+  });
+
+  it("returns invalid when style block is missing", () => {
+    const result = validateDesignSystemCompliance(makeWithoutStyleBlock());
+
+    expect(result.isValid).toBe(false);
+    expectIssuePath(result, "style");
+  });
+
+  it("returns invalid when media query is missing", () => {
+    const result = validateDesignSystemCompliance(makeWithoutMedia());
+
+    expect(result.isValid).toBe(false);
+    expectIssuePath(result, "style.@media");
+  });
+
+  it("returns invalid when motion rules are missing", () => {
+    const result = validateDesignSystemCompliance(makeWithoutMotion());
+
+    expect(result.isValid).toBe(false);
+    expectIssuePath(result, "style.motion");
+  });
+
+  it("returns invalid when css custom properties are missing", () => {
+    const result = validateDesignSystemCompliance(makeWithoutTokens());
+
+    expect(result.isValid).toBe(false);
+    expectIssuePath(result, "style.tokens");
+  });
+
+  it("returns invalid when scoped button selector is missing", () => {
+    const result = validateDesignSystemCompliance(makeWithoutScopedButton());
+
+    expect(result.isValid).toBe(false);
+    expectIssuePath(result, "style.buttonScope");
+  });
+
+  it("returns output contract with isValid issues and errors", () => {
+    const result = validateDesignSystemCompliance(makeWithoutStyleBlock());
 
     expect(result).toMatchObject({
       isValid: expect.any(Boolean),
@@ -159,16 +166,9 @@ describe("designSystemValidator", () => {
     }
   });
 
-  it("never throws on unexpected nested values", () => {
-    const weirdInputs: unknown[] = [
-      { nested: { value: [1, 2, { deep: true }] } },
-      ["<style>", { broken: true }, 123],
-    ];
+  it("keeps errors aligned with issue messages", () => {
+    const result = validateDesignSystemCompliance(makeWithoutScopedButton());
 
-    for (const value of weirdInputs) {
-      expect(() => validateDesignSystemCompliance(value)).not.toThrow();
-      const result = validateDesignSystemCompliance(value);
-      expectInvalidResult(result);
-    }
+    expect(result.errors).toEqual(result.issues.map((issue) => issue.message));
   });
 });
