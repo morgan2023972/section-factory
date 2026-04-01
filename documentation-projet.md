@@ -443,6 +443,7 @@ Unit:
 - tests/unit/optimizeSection.cli.test.ts
 - tests/unit/registry.test.ts
 - tests/unit/retryGenerator.test.ts
+- tests/unit/sectionBuilder.test.ts
 - tests/unit/sectionOptimizer.test.ts
 - tests/unit/sectionGenerator.test.ts
 - tests/unit/sectionTypeMapping.test.ts
@@ -615,3 +616,44 @@ Resultats de validation:
 Commit associe:
 
 - `a961547` test(core): add focused Vitest coverage for designSystemValidator
+
+## 18. Journal de mise a jour (2026-04-01 - recalibrage validator et sectionBuilder)
+
+Contexte:
+
+- objectif: aligner strictement les tests designSystemValidator au comportement reel (validator CSS/string)
+- objectif complementaire: ajouter une couverture unitaire a forte valeur pour sectionBuilder
+
+Actions executees:
+
+1. recalibrage de `tests/unit/designSystemValidator.test.ts` sur les cas reels:
+
+- cas valide complet
+- entree non-string
+- absence de `<style>`
+- absence de `@media`
+- absence de motion
+- absence de custom property CSS
+- absence de bouton scope sous `.section-{{ section.id }}`
+- contrat de sortie (`isValid`, `issues`, `errors`)
+- alignement `errors` avec `issues.map(message)`
+
+2. ajout de `tests/unit/sectionBuilder.test.ts` pour la logique I/O et nommage:
+
+- normalisation du nom de fichier `.liquid`
+- fallback sur `section.liquid` si nom vide apres sanitation
+- rejection si code vide/whitespace/nullish
+- chemin de sortie absolu et deterministe
+- absence de fuite brute `[object Object]` dans le nom de sortie
+
+Resultats de validation:
+
+- tests designSystemValidator: 9/9 passants
+- tests sectionBuilder: 8/8 passants
+- suite complete: 18 fichiers, 136 tests passants
+- couverture module `src/core/sectionBuilder.ts`: 100% statements, 100% branches, 100% lines
+
+Commits associes:
+
+- `f2e9f05` test(core): recalibrate designSystemValidator tests to actual css-validator behavior
+- `77df6d9` test(core): add focused unit tests for sectionBuilder write behavior
