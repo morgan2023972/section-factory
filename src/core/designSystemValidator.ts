@@ -1,34 +1,57 @@
+export interface DesignValidationIssue {
+  path: string;
+  message: string;
+}
+
 export interface DesignValidationResult {
   isValid: boolean;
+  issues: DesignValidationIssue[];
   errors: string[];
 }
 
 export function validateDesignSystemCompliance(
-  sectionCode: string,
+  sectionCode: unknown,
 ): DesignValidationResult {
-  const errors: string[] = [];
+  const issues: DesignValidationIssue[] = [];
+  const pushIssue = (path: string, message: string): void => {
+    issues.push({ path, message });
+  };
 
-  const styleBlocks =
-    sectionCode.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || [];
+  const source = typeof sectionCode === "string" ? sectionCode : "";
+
+  if (typeof sectionCode !== "string") {
+    pushIssue("sectionCode", "Section code must be a string.");
+  }
+
+  const styleBlocks = source.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || [];
   const cssContent = styleBlocks.join("\n");
 
   if (!cssContent.trim()) {
-    errors.push("Missing CSS style block for design system rules.");
+    pushIssue("style", "Missing CSS style block for design system rules.");
   }
 
   if (cssContent.trim() && !/@media\s*\(/i.test(cssContent)) {
-    errors.push("Design system expects responsive CSS using @media rules.");
+    pushIssue(
+      "style.@media",
+      "Design system expects responsive CSS using @media rules.",
+    );
   }
 
   if (
     cssContent.trim() &&
     !/(transition\s*:|animation\s*:|@keyframes)/i.test(cssContent)
   ) {
-    errors.push("Design system expects animation or transition rules.");
+    pushIssue(
+      "style.motion",
+      "Design system expects animation or transition rules.",
+    );
   }
 
   if (cssContent.trim() && !/--[a-z0-9-]+\s*:/i.test(cssContent)) {
-    errors.push("Design system expects CSS tokens via custom properties.");
+    pushIssue(
+      "style.tokens",
+      "Design system expects CSS tokens via custom properties.",
+    );
   }
 
   if (
@@ -37,13 +60,17 @@ export function validateDesignSystemCompliance(
       cssContent,
     )
   ) {
-    errors.push(
+    pushIssue(
+      "style.buttonScope",
       "Design system expects button styling scoped under .section-{{ section.id }}.",
     );
   }
 
+  const errors = issues.map((issue) => issue.message);
+
   return {
-    isValid: errors.length === 0,
+    isValid: issues.length === 0,
+    issues,
     errors,
   };
 }
