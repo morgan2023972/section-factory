@@ -1,6 +1,6 @@
 # Documentation projet - section-factory
 
-Date de mise a jour: 2026-03-30
+Date de mise a jour: 2026-04-01
 
 ## 1. Resume
 
@@ -430,7 +430,9 @@ Unit:
 - tests/unit/index.cli.test.ts
 - tests/unit/optimizeSection.cli.test.ts
 - tests/unit/registry.test.ts
+- tests/unit/retryGenerator.test.ts
 - tests/unit/sectionOptimizer.test.ts
+- tests/unit/sectionGenerator.test.ts
 - tests/unit/sectionTypeMapping.test.ts
 - tests/unit/sectionValidator.test.ts
 - tests/unit/validateSection.cli.test.ts
@@ -503,3 +505,67 @@ Etat global observe:
 - expliciter un schema JSON de sortie pour validate et doctor en docs techniques
 - ajouter des tests e2e complets avec mock OpenAI et workflow generation->validation->ecriture
 - documenter l integration pratique entre section-factory et MCP-doc-shopify dans un guide unique
+
+## 16. Journal de mise a jour (2026-04-01)
+
+Contexte:
+
+- objectif: augmenter la couverture de generation OpenAI et retry avec un plan en 3 commits, puis une passe complementaire pour fermer les branches restantes
+- perimetre: tests unitaires + integration CLI generate
+
+Actions executees:
+
+1. analyse ciblee de `src/core/sectionGenerator.ts` et `src/generator/retryGenerator.ts`
+2. plan d implementation detaille test-par-test valide
+3. implementation en 3 commits atomiques:
+   - `0f86a0e` test(core): add unit coverage for sectionGenerator OpenAI flow
+   - `848cabf` test(generator): add retryGenerator unit tests for retry and prompt logic
+   - `a2b978e` test(cli): extend generateSection integration for retry options
+4. passe complementaire de couverture:
+   - `71300b3` test(core,generator): add complementary branch coverage scenarios
+5. push confirme sur GitHub pour le depot principal et le sous-projet MCP-doc-shopify
+
+Fichiers de tests ajoutes/modifies:
+
+- ajoute: `tests/unit/sectionGenerator.test.ts`
+- ajoute: `tests/unit/retryGenerator.test.ts`
+- modifie: `tests/integration/generateSection.cli.integration.test.ts`
+
+Scenarios couverts (resume):
+
+- sectionGenerator:
+  - prompt vide
+  - OPENAI_API_KEY manquante
+  - fallback OPENAI_MODEL (`gpt-4.1-mini`)
+  - OPENAI_MODEL explicite
+  - trim output
+  - output vide/absent
+  - erreur provider Error
+  - erreur provider non-Error
+- retryGenerator:
+  - prompt de retry compose correctement
+  - fallback issue si liste vide
+  - succes premier essai
+  - succes apres plusieurs tentatives
+  - reponse IA vide
+  - exceptions generateCorrection (Error + non-Error)
+  - normalisation issues malformees
+  - validateCandidate sync et async
+  - maxRetries invalide (fallback) et non-entier
+  - seed initial currentCode/currentIssues
+- integration CLI generate:
+  - `--max-retries` applique
+  - echec apres retries epuises avec restitution erreurs finales
+  - `--max-retries 0` sans retry (echec immediat)
+
+Resultats de validation:
+
+- suite complete: 16 fichiers de tests, 116 tests passants
+- couverture ciblee modules:
+  - `src/core/sectionGenerator.ts`: 100% statements, 100% branches, 100% lines
+  - `src/generator/retryGenerator.ts`: 100% statements, 96.66% branches, 100% lines
+- couverture globale projet (apres changements):
+  - 78.88% statements
+  - 71.91% branches
+  - 76.28% functions
+  - 78.60% lines
