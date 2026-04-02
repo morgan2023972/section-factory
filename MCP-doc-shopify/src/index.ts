@@ -8,6 +8,11 @@ import {
   suggestSettings,
   suggestSettingsInputSchema,
 } from "./tools/suggestSettings.js";
+import {
+  runSearchShopifyDocs,
+  searchShopifyDocsInputSchema,
+} from "./tools/searchShopifyDocs.js";
+import { registerGuideResources } from "./resources/registerResources.js";
 
 const server = new McpServer({
   name: "shopify-docs-mcp",
@@ -78,6 +83,22 @@ server.registerTool(
     };
   },
 );
+
+server.registerTool(
+  "search_shopify_docs",
+  {
+    title: "Search Shopify docs",
+    description:
+      "Searches local indexed Shopify documentation with optional topic filtering.",
+    inputSchema: searchShopifyDocsInputSchema.shape,
+  },
+  async (input) => {
+    const parsed = searchShopifyDocsInputSchema.parse(input);
+    return runSearchShopifyDocs(parsed);
+  },
+);
+
+registerGuideResources(server);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

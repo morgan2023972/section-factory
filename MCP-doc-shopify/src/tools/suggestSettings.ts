@@ -1,20 +1,13 @@
 import { z } from "zod";
-import { CATEGORY_SETTINGS_MAP } from "../shopifyDocs.js";
+import { shopifyDocsProvider } from "../catalog/provider.js";
+import type { SuggestSettingsPayload } from "../catalog/types.js";
 
 export const suggestSettingsInputSchema = z.object({
   category: z.string().min(1),
 });
 
-export function suggestSettings(input: { category: string }) {
-  const key = input.category.toLowerCase();
-  const suggestions = CATEGORY_SETTINGS_MAP[key] ?? [
-    "title",
-    "text",
-    "color_scheme",
-  ];
-
-  return {
-    category: key,
-    suggestedSettings: suggestions,
-  };
+export function suggestSettings(input: {
+  category: string;
+}): SuggestSettingsPayload {
+  return shopifyDocsProvider.suggestSettings(input.category);
 }

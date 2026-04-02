@@ -1,8 +1,6 @@
-import { SHOPIFY_SECTION_RULES } from "../shopifyDocs.js";
+import { shopifyDocsProvider } from "../catalog/provider.js";
+import type { SectionRulesPayload } from "../catalog/types.js";
 
-export function getSectionRules() {
-  return {
-    title: "Shopify section rules",
-    rules: SHOPIFY_SECTION_RULES,
-  };
+export function getSectionRules(): SectionRulesPayload {
+  return shopifyDocsProvider.getSectionRules();
 }

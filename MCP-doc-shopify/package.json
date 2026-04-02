@@ -7,7 +7,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test:search": "tsx --test src/search/searchEngine.test.ts",
+    "test:adapters": "tsx --test src/adapters/adapters.test.ts",
+    "test:contracts": "tsx --test src/integration/contracts.integration.test.ts",
+    "docs:fetch": "tsx src/pipeline/fetchDocs.ts",
+    "docs:normalize": "tsx src/pipeline/normalizeDocs.ts",
+    "docs:build-index": "tsx src/pipeline/buildIndex.ts",
+    "docs:pipeline": "npm run docs:fetch && npm run docs:normalize && npm run docs:build-index"
   },
   "engines": {
     "node": ">=20 <21"

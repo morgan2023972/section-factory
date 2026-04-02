@@ -1,8 +1,6 @@
-import { SHOPIFY_SCHEMA_GUIDE } from "../shopifyDocs.js";
+import { shopifyDocsProvider } from "../catalog/provider.js";
+import type { SchemaGuidePayload } from "../catalog/types.js";
 
-export function getSchemaGuide() {
-  return {
-    title: "Shopify section schema guide",
-    schema: SHOPIFY_SCHEMA_GUIDE,
-  };
+export function getSchemaGuide(): SchemaGuidePayload {
+  return shopifyDocsProvider.getSchemaGuide();
 }

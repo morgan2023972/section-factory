@@ -1,0 +1,467 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-04-02T11:58:06.356Z",
+  "sourceCount": 5,
+  "documentCount": 5,
+  "documents": [
+    {
+      "id": "json-templates",
+      "topic": "json-templates",
+      "sourceUrl": "https://shopify.dev/docs/storefronts/themes/architecture/templates/json-templates",
+      "title": "JSON templates",
+      "summary": "JSON templates Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Bes",
+      "keyRules": [
+        "JSON templates Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Migrating to Online Store 2.",
+        "When you build a JSON template, you should also build a section that contains the core functionality for the template.",
+        "For example, when you&#x27;re building a list-collections JSON template, it should reference a section that uses the collections object .",
+        "The root should be an object with the following attributes: Attribute Type Required Description layout String or false No The filename of the layout to use when rendering the template.",
+        "For example, specify \"full-width\" to render layout/full-width.liquid .The default layout is theme.liquid .Use the value false to render the template without a layout.",
+        "sections Object Yes An object that uses section IDs as keys, and section data as values.",
+        "order Array Yes An array of section IDs, listed in the order that they should be rendered.",
+        "The IDs must exist in the sections object."
+      ],
+      "keywords": [
+        "template",
+        "templates",
+        "can",
+        "x27",
+        "editor",
+        "product",
+        "schema",
+        "you",
+        "data",
+        "type",
+        "settings",
+        "should"
+      ],
+      "chunks": [
+        {
+          "id": "chunk-1",
+          "text": "JSON templates Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and secur"
+        },
+        {
+          "id": "chunk-2",
+          "text": "ity Migrating to Online Store 2. Login redirects Troubleshooting Sell themes Theme Store Full index Expand On this page Supported features Schema Content JSON templates Ask assistant JSON templates allow you to control the look and feel of different pages of the online store using sections . JSON templates are data files that store a list of sections to be rendered, and their associated settings. Merchants can add, remove, and reorder these sections using the theme editor. When a page is rendered with a JSON template, the sections are rendered in the order specified by the order attribute , with no markup between the sections. JSON templates can render up to 25 sections, and each section can have up to 50 blocks. Anchor to Supported features Supported features Although JSON templates differ from Liquid templates in their contents, they are still template files that support the following"
+        },
+        {
+          "id": "chunk-3",
+          "text": "Shopify theme features: All template types, except for gift_card and robots.txt . Alternate templates . When you build a JSON template, you should also build a section that contains the core functionality for the template. For example, when you&#x27;re building a list-collections JSON template, it should reference a section that uses the collections object . A theme can contain up to 1,000 JSON templates. After the limit is reached, you can&#x27;t create new JSON templates. Anchor to Schema Schema A JSON template accepts only a JSON file with a fixed schema and list of accepted attributes. The root should be an object with the following attributes: Attribute Type Required Description layout String or false No The filename of the layout to use when rendering the template. For example, specify \"full-width\" to render layout/full-width.liquid .The default layout is theme.liquid .Use the valu"
+        },
+        {
+          "id": "chunk-4",
+          "text": "e false to render the template without a layout. Templates without a layout can&#x27;t be customized in the theme editor. wrapper String No The HTML wrapper element for the template&#x27;s sections. To learn more, refer to The wrapper property . sections Object Yes An object that uses section IDs as keys, and section data as values. This attribute needs to contain at least one section.Duplicate IDs within the template aren&#x27;t allowed.The format of the section data is the same as section data in settings_data.json . To learn more, refer to Section data . JSON templates can render up to 25 sections, and each section can have up to 50 blocks. order Array Yes An array of section IDs, listed in the order that they should be rendered. The IDs must exist in the sections object. Duplicates are not allowed. Tip Section files must define presets in their schema to support being added to JSON t"
+        },
+        {
+          "id": "chunk-5",
+          "text": "emplates using the theme editor. Section files without presets should be included in the JSON file manually, and can&#x27;t be removed using the theme editor. Tip: Section files must define presets in their schema to support being added to JSON templates using the theme editor. Section files without presets should be included in the JSON file manually, and can&#x27;t be removed using the theme editor. Anchor to Naming JSON templates Naming JSON templates The filename must be a valid theme template type , with an optional suffix for an alternate template. For example, a product template can be named product.json or product.alternate.json . A template can only exist as a JSON or Liquid template, not both. For example, if product.liquid already exists, then you can&#x27;t create product.json . Anchor to The wrapper property The wrapper property The wrapper property makes it possible to inse"
+        },
+        {
+          "id": "chunk-6",
+          "text": "rt HTML tags around all of the sections in a JSON template. You can use the following HTML tags: <div> <main> <section> For example, a JSON file with the following wrapper property produces the following output: product.json Copy 99 1 2 3 4 5 6 7 8 9 10 11 { \"wrapper\" : \"div#div_id.div_class[attribute-one=value]\" , \"sections\" : { \"main\" : { \"type\" : \"product\" } } , \"order\" : [ \"main\" ] } Output Copy 9 1 2 3 < div id = \"div_id\" className = \"div_class\" attribute-one = \"value\" > <!-- product.json sections --> </ div > Anchor to Section data Section data The sections attribute of JSON templates holds the data for the sections to be rendered by the template. These can be either theme sections or app sections . You can&#x27;t share section data across JSON theme templates, so each section must have an ID that&#x27;s unique within the template. JSON templates can render up to 25 sections, and e"
+        },
+        {
+          "id": "chunk-7",
+          "text": "ach section can have up to 50 blocks. You can add sections to a template in code, or through the theme editor. The sections that are available to be added to a template in the theme editor might be limited by the enabled_on or disabled_on attribute of the section schema. If no enabled_on or disabled_on attribute is defined, then the section can be added to any template. The following table outlines the format of section data: Value Type Required Description <SectionID> String - A unique ID for the section. Accepts only alphanumeric characters. <SectionType> String Yes The filename of the section file to render, without the extension. <SectionDisabled> Boolean No When true , the section isn&#x27;t rendered but can still be customized in the theme editor. Is false by default. <BlockID> String - A unique ID for the block. Accepts only alphanumeric characters. <BlockType> String Yes The type"
+        },
+        {
+          "id": "chunk-8",
+          "text": "of block to render, as defined in the schema of the section file. <BlockOrder> Array No An array of block IDs, ordered as they should be rendered. The IDs must exist in the blocks object, and duplicate IDs aren&#x27;t allowed. <SettingID> String - The ID of a setting as defined in the schema of the section or the block. <SettingValue> (multiple) - A valid value for the setting. For example: Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 sections: { <SectionID>: { \"type\" : <SectionType>, \"disabled\" : <SectionDisabled>, \"settings\" : { <SettingID>: <SettingValue> } , \"blocks\" : { <BlockID>: { \"type\" : <BlockType>, \"settings\" : { <SettingID>: <SettingValue> } } } , \"block_order\" : <BlockOrder> } } For example, the following template renders the product.liquid and product-recommendations.liquid section files on product pages: templates/product.json Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13"
+        },
+        {
+          "id": "chunk-9",
+          "text": "14 15 16 17 { \"sections\" : { \"main\" : { \"type\" : \"product\" , \"settings\" : { \"show_vendor\" : true } } , \"recommendations\" : { \"type\" : \"product-recommendations\" } } , \"order\" : [ \"main\" , \"recommendations\" ] } Caution Any sections that are included in a template, and aren&#x27;t app sections, must exist in the theme. If they don&#x27;t, then this will result in an error. Caution: Any sections that are included in a template, and aren&#x27;t app sections, must exist in the theme. If they don&#x27;t, then this will result in an error. Anchor to Platform-controlled settings Platform-controlled settings In the theme editor, Shopify exposes a custom CSS setting at the theme and section level. Any custom CSS that merchants add to a section instance is stored in a custom_css attribute in the section data. This setting is intended to enable users to customize the look and feel of their storefron"
+        },
+        {
+          "id": "chunk-10",
+          "text": "t without editing theme code. As a theme developer, you shouldn&#x27;t add this setting, or edit the value of this setting after it&#x27;s set. Instead, you should use dedicated CSS assets and stylesheet Liquid tags , and introduce customization options for CSS in these areas using theme settings . Anchor to Content Content A JSON template accepts only JSON with a fixed schema and list of accepted attributes. For more information, refer to JSON templates . Was this page helpful? Yes No Supported features Schema Content Updates Developer changelog Shopify Editions Business growth Shopify Partners Program Shopify App Store Shopify Academy Legal Terms of service API terms of use Privacy policy Partners Program Agreement Shopify About Shopify Shopify Plus Careers Investors Press and media"
+        }
+      ],
+      "fetchedAt": "2026-04-02T11:57:56.034Z",
+      "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+    },
+    {
+      "id": "liquid-reference",
+      "topic": "liquid-reference",
+      "sourceUrl": "https://shopify.dev/docs/api/liquid",
+      "title": "Liquid reference",
+      "summary": "Liquid reference Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Collapse sidebar Liquid Overview What is a template language? Variations of Liquid Liquid basics Defining logic with tags Modifying output with filters Referencing objects Resources & tools Basics Tags Filters Objects",
+      "keyRules": [
+        "It&#x27;s available as an open source project on GitHub, and is used by many different software projects and companies.",
+        "This reference documents the Liquid tags, filters, and objects that you can use to build Shopify Themes .",
+        "Anchor to Variations of Liquid Variations of Liquid The variation of Liquid in this reference extends the open-source version of Liquid for use with Shopify themes .",
+        "It includes tags, filters, and objects that can be used to render objects specific to Shopify stores and storefront functionality.",
+        "Shopify also uses slightly different versions of Liquid to render dynamic content for the following features.",
+        "These variations aren’t included in this reference.",
+        "Notification templates Notification templates Notification templates Shopify Flow Shopify Flow Shopify Flow Order printer templates Order printer templates Order printer templates Packing slip templates Packing slip templates Packing slip templates Anchor to Liquid basics Liquid basics Liquid is used to dynamically output objects and their properties.",
+        "Liquid also includes basic logical and comparison operators for use with tags."
+      ],
+      "keywords": [
+        "product",
+        "code",
+        "output",
+        "title",
+        "health",
+        "potion",
+        "objects",
+        "x27",
+        "tags",
+        "filters",
+        "anchor",
+        "templates"
+      ],
+      "chunks": [
+        {
+          "id": "chunk-1",
+          "text": "Liquid reference Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Collapse sidebar Liquid Overview What is a template language? Variations of Liquid Liquid basics Defining logic with tags Modifying output with filters Referencing objects Resources & tools Basics Tags Filters Objects Full index Liquid reference Liquid is a template language created by Shopify. It&#x27;s available as an open source project on GitHub, and is used by many different software projects and companies. This reference documents the Liquid tags, filters, and objects that you can use to build Shopify Themes . Ask assistant Anchor to What is a template language? What is a template language? A template language allows you to create a single template to host static content, and dynamically insert information depending on where the template is rendered. For example, you can create a"
+        },
+        {
+          "id": "chunk-2",
+          "text": "product template that hosts all of your standard product attributes, such as the product image, title, and price. That template can then dynamically render those attributes with the appropriate content, depending on the current product being viewed. Anchor to Variations of Liquid Variations of Liquid The variation of Liquid in this reference extends the open-source version of Liquid for use with Shopify themes . It includes tags, filters, and objects that can be used to render objects specific to Shopify stores and storefront functionality. Shopify also uses slightly different versions of Liquid to render dynamic content for the following features. These variations aren’t included in this reference. Notification templates Notification templates Notification templates Shopify Flow Shopify Flow Shopify Flow Order printer templates Order printer templates Order printer templates Packing sli"
+        },
+        {
+          "id": "chunk-3",
+          "text": "p templates Packing slip templates Packing slip templates Anchor to Liquid basics Liquid basics Liquid is used to dynamically output objects and their properties. You can further modify that output by creating logic with tags, or directly altering it with a filter. Objects and object properties are output using one of six basic data types. Liquid also includes basic logical and comparison operators for use with tags. Navigate to Basics Navigate to Basics Navigate to - Basics Code Reset Code 9 1 2 3 4 5 6 < title > {{ page_title }} </ title > {% if page_description -%} < meta name = \"description\" content = \" {{ page_description | truncate : 150 }} \" > {%- endif %} Code <title> {{ page_title }} </title> {% if page_description -%} <meta name=\"description\" content=\"{{ page_description | truncate: 150 }}\"> {%- endif %} Output 9 1 2 3 4 < title > Health potion </ title > < meta name = \"descrip"
+        },
+        {
+          "id": "chunk-4",
+          "text": "tion\" content = \"Are you low on health? Well we've got the potion just for you! Just need a top up? Almost dead? In between? No need to worry because we have a ...\" > Output <title> Health potion </title> <meta name=\"description\" content=\"Are you low on health? Well we&#x27;ve got the potion just for you! Just need a top up? Almost dead? In between? No need to worry because we have a ...\"> Anchor to Defining logic with tags Defining logic with tags Liquid tags are used to define logic that tells templates what to do. Tags are wrapped with curly brace percentage delimiters {% %} . The text within the delimiters is an instruction, not content to render. In the example to the right, the if tag defines the condition to be met. If product.available returns true , then the price is displayed. Otherwise, the “sold out” message is shown. {% %} To nest multiple tags inside one set of delimiters,"
+        },
+        {
+          "id": "chunk-5",
+          "text": "use the liquid tag. Code Data Reset Code 9 1 2 3 4 5 {% if product . available %} Price: $99.99 {% else %} Sorry, this product is sold out. {% endif %} Code {% if product.available %} Price: $99.99 {% else %} Sorry, this product is sold out. {% endif %} Data { \"product\": { \"available\": true } } Output 9 1 Price: $99.99 Output Price: $99.99 Anchor to Tags with parameters Tags with parameters Some tags accept parameters: either required or optional. For example, the for tag takes an optional limit parameter to stop the loop at a specific index. Code Reset Code 9 1 2 3 4 5 {% assign numbers = '1,2,3,4,5' | split : ',' %} {% for item in numbers limit : 2 -%} {{ item }} {% endfor %} Code {% assign numbers = &#x27;1,2,3,4,5&#x27; | split: &#x27;,&#x27; %} {% for item in numbers limit:2 -%} {{ item }} {% endfor %} Output 9 1 2 1 2 Output 1 2 Anchor to Modifying output with filters Modifying out"
+        },
+        {
+          "id": "chunk-6",
+          "text": "put with filters Liquid filters modify the output of variables and objects. To filter the output of a tag, use the pipe character | , followed by the filter. In this example, product is the object, title is its property, and upcase is the filter. Code Data Reset Code 9 1 2 3 {% # product.title -> Health potion %} {{ product . title | upcase }} Code {% # product.title -> Health potion %} {{ product.title | upcase }} Data { \"product\": { \"title\": \"Health potion\" } } Output 9 1 HEALTH POTION Output HEALTH POTION Anchor to Filters with parameters Filters with parameters Many filters accept parameters that adjust their output. Some parameters are required, others are optional. Code Data Reset Code 9 1 2 3 {% # product.title -> Health potion %} {{ product . title | remove : 'Health' }} Code {% # product.title -> Health potion %} {{ product.title | remove: &#x27;Health&#x27; }} Data { \"product\":"
+        },
+        {
+          "id": "chunk-7",
+          "text": "{ \"title\": \"Health potion\" } } Output 9 1 potion Output potion Anchor to Using multiple filters Using multiple filters Multiple filters can be used on one output. They&#x27;re applied from left to right. Code Data Reset Code 9 1 2 3 {% # product.title -> Health potion %} {{ product . title | upcase | remove : 'HEALTH' }} Code {% # product.title -> Health potion %} {{ product.title | upcase | remove: &#x27;HEALTH&#x27; }} Data { \"product\": { \"title\": \"Health potion\" } } Output 9 1 POTION Output POTION Anchor to Referencing objects Referencing objects Liquid objects represent variables that you can use to build your theme. Object types include, but aren&#x27;t limited to: Store resources, such as a collection or product and its properties Standard content that is used to power Shopify themes, such as content_for_header Functional elements that can be used to build interactivity, such as p"
+        },
+        {
+          "id": "chunk-8",
+          "text": "aginate and search Objects might represent a single data point, or contain multiple properties. Some products might represent a related object, such as a product in a collection. {{ }} Double curly brace delimiters denote an output. Anchor to Usage Usage To output an object, wrap it in curly brace delimiters {{ }} . To output an object&#x27;s property, use dot notation. This example outputs the product object&#x27;s title property. Code Data Reset Code 9 1 {{ product . title }} Code {{ product.title }} Data { \"product\": { \"title\": \"Health potion\" } } Output 9 1 Health potion Output Health potion Anchor to Object access Object access Objects can be accessed in three ways: Globally : Available in any Liquid file, excluding checkout.liquid and Liquid asset files In templates : Available in specific templates and their sections or blocks. For example, the product object in a product template"
+        },
+        {
+          "id": "chunk-9",
+          "text": "Through parent objects : Returned as properties of other objects. For example, article objects through articles or blog Check each object&#x27;s documentation to see how it can be accessed. Anchor to Creating variables Creating variables To create your own variables, use variable tags like assign or capture . Syntactically, Liquid treats variables the same as objects. Code Reset Code 9 1 2 {% assign my_variable = 'My custom string.' %} {{ my_variable }} Code {% assign my_variable = &#x27;My custom string.&#x27; %} {{ my_variable }} Output 9 1 My custom string. Output My custom string. Anchor to Resources & tools Resources & tools Liquid Cheat Sheet A simple reference guide to the Liquid language. Liquid Cheat Sheet A simple reference guide to the Liquid language. Liquid Cheat Sheet A simple reference guide to the Liquid language. Theme Check Command line-based linter for themes. Also co"
+        },
+        {
+          "id": "chunk-10",
+          "text": "mes as an official Visual Studio Code extension. Theme Check Command line-based linter for themes. Also comes as an official Visual Studio Code extension. Theme Check Command line-based linter for themes. Also comes as an official Visual Studio Code extension. Shopify CLI for Themes A powerful command-line tool for building Shopify themes, and exploring Liquid code in a REPL interface. Shopify CLI for Themes A powerful command-line tool for building Shopify themes, and exploring Liquid code in a REPL interface. Shopify CLI for Themes A powerful command-line tool for building Shopify themes, and exploring Liquid code in a REPL interface. Open source liquid Liquid is an open source project on GitHub. Open source liquid Liquid is an open source project on GitHub. Open source liquid Liquid is an open source project on GitHub. Was this page helpful? Yes No Updates Developer changelog Shopify"
+        },
+        {
+          "id": "chunk-11",
+          "text": "Editions Business growth Shopify Partners Program Shopify App Store Shopify Academy Legal Terms of service API terms of use Privacy policy Partners Program Agreement Shopify About Shopify Shopify Plus Careers Investors Press and media"
+        }
+      ],
+      "fetchedAt": "2026-04-02T11:57:56.325Z",
+      "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+    },
+    {
+      "id": "os2-intro",
+      "topic": "os2-compatibility",
+      "sourceUrl": "https://shopify.dev/docs/storefronts/themes/architecture",
+      "title": "Theme architecture",
+      "summary": "Theme architecture Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales",
+      "keyRules": [
+        "Theme architecture Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Migrating to Online Store 2.",
+        "Note If you&#x27;re building a theme for the Shopify Theme Store , then you need to meet certain requirements for the customization options that your theme offers, your theme&#x27;s style, and the features that you include.",
+        "Note: If you&#x27;re building a theme for the Shopify Theme Store , then you need to meet certain requirements for the customization options that your theme offers, your theme&#x27;s style, and the features that you include.",
+        "They use Liquid to generate the HTML markup that makes up the pages of the merchant&#x27;s online store.",
+        "Config files - These files use JSON to store configuration data that can be customized by merchants using the theme editor .",
+        "Use the layout file to host repeated theme elements like headers and footers.",
+        "Each theme should include different types of templates to display different types of content, such as the home page and products .",
+        "Users can add comments within config/settings_schema.json and within schema tags."
+      ],
+      "keywords": [
+        "files",
+        "you",
+        "can",
+        "directory",
+        "object",
+        "are",
+        "assets",
+        "x27",
+        "settings",
+        "store",
+        "features",
+        "template"
+      ],
+      "chunks": [
+        {
+          "id": "chunk-1",
+          "text": "Theme architecture Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and s"
+        },
+        {
+          "id": "chunk-2",
+          "text": "ecurity Migrating to Online Store 2. Login redirects Troubleshooting Sell themes Theme Store Full index Expand On this page Markup and features Supporting assets Directory structure and component types Theme architecture Ask assistant A theme controls the organization, features, and style of a merchant&#x27;s online store. Theme code is organized with a standard directory structure of files specific to Shopify themes, as well as supporting assets such as images, stylesheets, and scripts. To learn how themes fit into Shopify, and learn how to set up an environment to build and test themes, refer to the Shopify themes overview . Note If you&#x27;re building a theme for the Shopify Theme Store , then you need to meet certain requirements for the customization options that your theme offers, your theme&#x27;s style, and the features that you include. Note: If you&#x27;re building a theme for"
+        },
+        {
+          "id": "chunk-3",
+          "text": "the Shopify Theme Store , then you need to meet certain requirements for the customization options that your theme offers, your theme&#x27;s style, and the features that you include. Theme files fall into the following general categories: Markup and features - These files control the layout and functionality of a theme. They use Liquid to generate the HTML markup that makes up the pages of the merchant&#x27;s online store. Supporting assets - These files are assets, scripts, or locale files that are either called or consumed by other files in the theme. Config files - These files use JSON to store configuration data that can be customized by merchants using the theme editor . Anchor to Markup and features Markup and features The following components determine the organization of each page: Number Component Description 1 The layout file The base of the theme. Use the layout file to host"
+        },
+        {
+          "id": "chunk-4",
+          "text": "repeated theme elements like headers and footers. 2 The template The template that controls what&#x27;s displayed on a page. Each theme should include different types of templates to display different types of content, such as the home page and products . You can also create multiple templates for the same resource type and associate them with your store resources, to allow for variation. JSON templates act only as a wrapper for sections, while Liquid templates contain code. 3 The section groups rendered by the layout Containers that enable merchants to add, remove, and reorder sections in areas of the layout file such as the header and footer. 4 The sections rendered by the template Reusable, customizable modules of content that merchants can add to JSON templates and section groups. 5 The blocks that each section contains Reusable, customizable modules of content that can be added to s"
+        },
+        {
+          "id": "chunk-5",
+          "text": "ections, removed, and reordered. 6 The snippets being rendered Reusable pieces of Liquid code that can be rendered anywhere in the theme. Features can be introduced into themes in Liquid template files, sections, blocks, and snippets . You can implement theme features using Liquid, CSS, and JavaScript. A theme&#x27;s features determine how customers can interact with the content on an online store. For example, your theme needs to allow customers to add products to a cart by providing a Liquid form tag with a product type. Anchor to JSON with comments JSON with comments Theme files with JSON support comments and trailing commas. Users can add comments within config/settings_schema.json and within schema tags. For example: settings_schema.json Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 [ { /* context about theme schema settings */ \"name\" : \"theme_info\" , \"theme_name\" : \"Dawn\""
+        },
+        {
+          "id": "chunk-6",
+          "text": ", \"theme_author\" : \"Shopify\" , \"theme_version\" : \"1.0.0\" , \"theme_documentation_url\" : \"https:\\/\\/help.shopify.com\\/manual\\/online-store\\/themes\\/os20\\/themes-by-shopify\\/dawn\" , \"theme_support_url\" : \"https:\\/\\/support.shopify.com\\/\" , } , { \"name\" : \"t:settings_schema.colors.name\" , \"settings\" : [ { \"type\" : \"header\" , \"content\" : \"t:settings_schema.colors.settings.header__1.content\" , // some useful context + see trailing comma } , ... ] Files that users typically don&#x27;t edit won&#x27;t persist comments or trailing commas. This includes the following: Copy 9 1 2 3 4 templates/*.json sections/*.json (section groups) config/settings_data.json locales/*.json Note If you&#x27;re using the Assets API to fetch and parse theme files, then you&#x27;ll need to adopt a JSON parser that supports comments and trailing commas. The unstable version of the Admin API will add an autogenerated co"
+        },
+        {
+          "id": "chunk-7",
+          "text": "mment at the top of files that do not persist comments. This comment header will appear in files in the next stable version of the Admin API, 2024-10 Note: If you&#x27;re using the Assets API to fetch and parse theme files, then you&#x27;ll need to adopt a JSON parser that supports comments and trailing commas. The unstable version of the Admin API will add an autogenerated comment at the top of files that do not persist comments. This comment header will appear in files in the next stable version of the Admin API, 2024-10 Anchor to Supporting assets Supporting assets You can add supporting assets to your theme to control the presentation of components and features, or to store reusable pieces of code that can be used across components. For example, you need to add assets to style the theme. These resources help to define the aesthetic of the online store and how content sections are sty"
+        },
+        {
+          "id": "chunk-8",
+          "text": "led to express the merchant’s brand. The style of a theme is defined by the CSS and JavaScript applied to layout, template, and section files. Liquid and HTML that you want to reuse across your theme can be stored in snippets . Theme CSS and JavaScript is stored in the assets directory of the theme. In addition, you can translate your theme into different languages using locale files. Locale files contain a set of translations for text strings that are used throughout the theme, and are stored in the locales directory of the theme. Anchor to Directory structure and component types Directory structure and component types Themes must use the following directory structure: Shopify theme directory structure Copy 99 1 2 3 4 5 6 7 8 9 10 11 . ├── assets ├── blocks ├── config ├── layout ├── locales ├── sections ├── snippets └── templates └── customers └── metaobject Subdirectories, other than t"
+        },
+        {
+          "id": "chunk-9",
+          "text": "he ones listed, aren&#x27;t supported. To see an example of a complete theme directory structure, and the various component types, explore the Dawn GitHub repository . Note Only a layout directory containing a theme.liquid file is required for the theme to be uploaded to Shopify. Note: Only a layout directory containing a theme.liquid file is required for the theme to be uploaded to Shopify. Anchor to [object Object] assets The assets directory contains all of the assets used in a theme, including image, CSS, and JavaScript files. Use the asset_url Liquid URL filter to reference an asset within your theme. You can access limited Liquid functionality in non-binary asset files by appending a .liquid extension. Common use cases include JavaScript ( .js.liquid ) and CSS ( .css.liquid ) files. Files with this extension have access to the following features: The settings object Liquid filters"
+        },
+        {
+          "id": "chunk-10",
+          "text": "Anchor to [object Object] config The config directory contains the config files for a theme. Config files define settings in the Theme settings area of the theme editor, as well as store their values. Theme settings are a good place to host general settings such as typography and color options. Theme settings can be accessed through the settings object . Tip You can also create settings for sections and blocks . These settings are defined as part of the parent section or block object, and appear in the theme editor with the associated object. Tip: You can also create settings for sections and blocks . These settings are defined as part of the parent section or block object, and appear in the theme editor with the associated object. Anchor to [object Object] layout The layout directory contains the layout files for a theme, through which template files are rendered. Layouts are Liquid fil"
+        },
+        {
+          "id": "chunk-11",
+          "text": "es that enable you to include content that should be repeated on multiple page types in a single location. For example, layouts are a good place to include any content you might want in your <head> element, as well as section groups for headers and footers. A theme.liquid file must exist in this folder for the theme to be uploaded to Shopify. Anchor to [object Object] locales The locales directory contains the locale files for a theme, which are used to provide translated content. Locale files allow you to provide a translated experience in the theme editor , provide translations for the online store, and allow merchants to customize text in the online store. Anchor to [object Object] sections The sections directory contains a theme’s sections and section groups . Sections are Liquid files that allow you to create reusable modules of content that can be customized by merchants. They can"
+        },
+        {
+          "id": "chunk-12",
+          "text": "also include blocks which allow merchants to add, remove, and reorder content within a section. Section groups are JSON containers that allow merchants to add, remove, and reorder sections in areas of the layout file such as the header and footer. Anchor to [object Object] snippets The snippets directory contains Liquid snippet files that host smaller reusable snippets of code. Snippets are reusable pieces of Liquid code that can be rendered anywhere in your theme, and are invisible to merchants in the theme editor. Tip You can provide LiquidDoc definitions which will enable additional tooling support through the Shopify VS Code Extension Tip: You can provide LiquidDoc definitions which will enable additional tooling support through the Shopify VS Code Extension Anchor to [object Object] templates The templates directory contains a theme’s template files , which control what&#x27;s rende"
+        },
+        {
+          "id": "chunk-13",
+          "text": "red on each type of page. The templates/customers directory contains the template files for legacy customer account pages, like login and account overview. You can use the template to add functionality that makes sense for the page type. For example, you can add additional product recommendations to a product template, or add a comment form to an article template. You can also create multiple versions of the same template type to create custom templates for different use cases. No templates are required. However, you need to have a matching template for any page type that you want to render. For example, to render a product page, you need at least one template of type product . Was this page helpful? Yes No Markup and features Supporting assets Directory structure and component types Updates Developer changelog Shopify Editions Business growth Shopify Partners Program Shopify App Store S"
+        },
+        {
+          "id": "chunk-14",
+          "text": "hopify Academy Legal Terms of service API terms of use Privacy policy Partners Program Agreement Shopify About Shopify Shopify Plus Careers Investors Press and media"
+        }
+      ],
+      "fetchedAt": "2026-04-02T11:57:58.320Z",
+      "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+    },
+    {
+      "id": "section-schema",
+      "topic": "schema",
+      "sourceUrl": "https://shopify.dev/docs/storefronts/themes/architecture/sections/section-schema",
+      "title": "Section schema",
+      "summary": "Section schema Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Bes",
+      "keyRules": [
+        "Section schema Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Migrating to Online Store 2.",
+        "However, it doesn&#x27;t output its contents, or render any Liquid included inside it.",
+        "However, it doesn&#x27;t output its contents, or render any Liquid included inside it.",
+        "The following is an example of a valid section schema for the Slideshow section: /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"limit\" : 1 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"max_blocks\" : 5 , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] , \"presets\" : [ { \"name\" : \"Slideshow\" , \"settings\" : { \"title\" : \"Slideshow\" } , \"blocks\" : [ { \"type\" : \"slide\" } , { \"type\" : \"slide\" } ] } ] , \"locales\" : { \"en\" : { \"title\" : \"Slideshow\" } , \"fr\" : { \"title\" : \"Diaporama\" } } , \"enabled_on\" : { \"templates\" : [ \"*\" ] , \"groups\" : [ \"footer\" ] } } { % endschema % } Each section can have only a single {% schema %} tag, which must contain only valid JSON using the attributes listed below.",
+        "For example, the following schema returns the following output: Copy 9 1 2 3 4 5 { % schema % } { \"name\" : \"Slideshow\" } { % endschema % } Output Anchor to tag tag By default, when Shopify renders a section, it&#x27;s wrapped in a <div> element with a unique id attribute: Copy 9 1 2 3 < div id = \"shopify-section-[id]\" className = \"shopify-section\" > // Output of the section content </ div > If you don&#x27;t want to use a <div> , then you can specify which kind of HTML element to use with the tag attribute.",
+        "You can specify a limit of 1 or 2 with the limit attribute: /sections/slideshow.liquid Copy 9 1 2 3 4 5 6 7 8 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"limit\" : 1 } { % endschema % } Anchor to settings settings You can create section specific settings to allow merchants to customize the section with the settings object: /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"header\" , \"label\" : \"Header\" } ] } { % endschema % } Caution All section setting IDs must be unique within each section.",
+        "Caution: All section setting IDs must be unique within each section.",
+        "Blocks have the following attributes: blocks attributes Attribute Description Required type The block type."
+      ],
+      "keywords": [
+        "slideshow",
+        "blocks",
+        "settings",
+        "type",
+        "block",
+        "name",
+        "you",
+        "can",
+        "x27",
+        "title",
+        "tag",
+        "slide"
+      ],
+      "chunks": [
+        {
+          "id": "chunk-1",
+          "text": "Section schema Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and secur"
+        },
+        {
+          "id": "chunk-2",
+          "text": "ity Migrating to Online Store 2. Login redirects Troubleshooting Sell themes Theme Store Full index Expand On this page name tag class limit settings blocks max_ blocks presets default locales enabled_ on disabled_ on Section schema Ask assistant {% schema %} tag for sections allows you to define the following section attributes and settings: name tag class limit settings blocks max_blocks presets default locales enabled_on disabled_on These attributes and settings enable different customization options and preconfigurations of the section inside the theme editor. Note The {% schema %} tag is a Liquid tag. However, it doesn&#x27;t output its contents, or render any Liquid included inside it. Note: The {% schema %} tag is a Liquid tag. However, it doesn&#x27;t output its contents, or render any Liquid included inside it. The following is an example of a valid section schema for the Slides"
+        },
+        {
+          "id": "chunk-3",
+          "text": "how section: /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"limit\" : 1 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"max_blocks\" : 5 , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] , \"presets\" : [ { \"name\" : \"Slideshow\" , \"settings\" : { \"title\" : \"Slideshow\" } , \"blocks\" : [ { \"type\" : \"slide\" } , { \"type\" : \"slide\" } ] } ] , \"locales\" : { \"en\" : { \"title\" : \"Slideshow\" } , \"fr\" : { \"title\" : \"Diaporama\" } } , \"enabled_on\" : { \"templates\" : [ \"*\" ] , \"groups\" : [ \"footer\" ] } } { % endschema % } Each section can have only a singl"
+        },
+        {
+          "id": "chunk-4",
+          "text": "e {% schema %} tag, which must contain only valid JSON using the attributes listed below. The tag can be placed anywhere within the section file, but it can&#x27;t be nested inside another Liquid tag. Caution Having more than one {% schema %} tag, or placing it inside another Liquid tag, will result in a syntax error when editing your theme code. Caution: Having more than one {% schema %} tag, or placing it inside another Liquid tag, will result in a syntax error when editing your theme code. Consider making your section compatible with app blocks . When you create app blocks, merchants can add app content to their theme without directly editing their theme code. Anchor to name name The name attribute determines the section title that is shown in the theme editor. For example, the following schema returns the following output: Copy 9 1 2 3 4 5 { % schema % } { \"name\" : \"Slideshow\" } { %"
+        },
+        {
+          "id": "chunk-5",
+          "text": "endschema % } Output Anchor to tag tag By default, when Shopify renders a section, it&#x27;s wrapped in a <div> element with a unique id attribute: Copy 9 1 2 3 < div id = \"shopify-section-[id]\" className = \"shopify-section\" > // Output of the section content </ div > If you don&#x27;t want to use a <div> , then you can specify which kind of HTML element to use with the tag attribute. The following are the accepted values: article aside div footer header section For example, the following schema returns the following output: /sections/slideshow.liquid Copy 9 1 2 3 4 5 6 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" } { % endschema % } Output Copy 9 1 2 3 < section id = \"shopify-section-[id]\" className = \"shopify-section\" > // Output of the section content </ section > Anchor to class class When Shopify renders a section, it&#x27;s wrapped in an HTML element with a class of sh"
+        },
+        {
+          "id": "chunk-6",
+          "text": "opify-section . You can add to that class with the class attribute: /sections/slideshow.liquid Copy 9 1 2 3 4 5 6 7 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" } { % endschema % } Output Copy 9 1 2 3 < section id = \"shopify-section-[id]\" class = \"shopify-section slideshow\" > // Output of the section content </ section > Anchor to limit limit By default, there&#x27;s no limit to how many times a section can be added to a template or section group. You can specify a limit of 1 or 2 with the limit attribute: /sections/slideshow.liquid Copy 9 1 2 3 4 5 6 7 8 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"limit\" : 1 } { % endschema % } Anchor to settings settings You can create section specific settings to allow merchants to customize the section with the settings object: /sections/slideshow.liquid Copy 99 1 2 3 4 5 6"
+        },
+        {
+          "id": "chunk-7",
+          "text": "7 8 9 10 11 12 13 14 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"header\" , \"label\" : \"Header\" } ] } { % endschema % } Caution All section setting IDs must be unique within each section. Having duplicate IDs within a section will result in an error. Caution: All section setting IDs must be unique within each section. Having duplicate IDs within a section will result in an error. Anchor to Access section settings Access section settings Section settings can be accessed through the section object . Refer to Access settings to learn more. Tip If a section is statically rendered , then there&#x27;s only one instance of the section across all static renderings, as a result they all share the same section setting values. Tip: If a section is statically rendered , then there&#x27;s only one instance of the sectio"
+        },
+        {
+          "id": "chunk-8",
+          "text": "n across all static renderings, as a result they all share the same section setting values. Anchor to blocks blocks You can create blocks for a section. Blocks are reusable modules of content that can be added, removed, and reordered within a section. Blocks have the following attributes: blocks attributes Attribute Description Required type The block type. This is a free-form string that you can use as an identifier. You can access this value through the type attribute of the block object . Yes name The block name, which will show as the block title in the theme editor. Yes limit The number of blocks of this type that can be used. No settings Any input or sidebar settings that you want for the block. Certain settings might be used as the title of the block in the theme editor . No The following is an example of including blocks in a section: /sections/slideshow.liquid Copy 99 1 2 3 4 5"
+        },
+        {
+          "id": "chunk-9",
+          "text": "6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] } { % endschema % } Caution All block names and types must be unique within each section, and all setting IDs must be unique within each block. Having duplicates will result in an error. Caution: All block names and types must be unique within each section, and all setting IDs must be unique within each block. Having duplicates will result in an error. Anchor to Access block settings Access block settings Block settings can be accessed through the block object . Refer to Access settings to learn more. Tip If a section is statical"
+        },
+        {
+          "id": "chunk-10",
+          "text": "ly rendered , then there&#x27;s only one instance of the section across all static renderings, meaning they all share the same block setting values. Tip: If a section is statically rendered , then there&#x27;s only one instance of the section across all static renderings, meaning they all share the same block setting values. Anchor to Render blocks Render blocks You can render a section&#x27;s blocks by looping over the blocks attribute of the section object : Copy 9 1 2 3 4 5 6 7 8 9 {% for block in section . blocks %} {% case block . type %} {% when 'slide' %} < div className = \"slide\" {{ block . shopify_attributes }} > {{ block . settings . image | image_url : width : 2048 | image_tag }} </ div > ... {% endcase %} {% endfor %} In the example above, each block&#x27;s content is included inside a parent container, and that container has {{ block.shopify_attributes }} added as an attribu"
+        },
+        {
+          "id": "chunk-11",
+          "text": "te. Shopify&#x27;s theme editor uses that attribute to identify blocks in its JavaScript API . If your block is a single element, then ensure that the element has this attribute. Caution Don&#x27;t rely on the literal value of a block&#x27;s ID when you iterate over blocks. The ID is dynamically generated and is subject to change. The following is an example of relying on a literal value of a block&#x27;s ID, which may break functionality in your theme if the ID changes: Copy 9 1 2 3 4 5 {% for block in section . blocks %} {%- if block . id == 'J6d9jV' -%} < h1 > {{ block . settings . heading }} </ h1 > {% endif %} {% endfor %} Caution: Don&#x27;t rely on the literal value of a block&#x27;s ID when you iterate over blocks. The ID is dynamically generated and is subject to change. The following is an example of relying on a literal value of a block&#x27;s ID, which may break functionality"
+        },
+        {
+          "id": "chunk-12",
+          "text": "in your theme if the ID changes: Copy 9 1 2 3 4 5 {% for block in section . blocks %} {%- if block . id == 'J6d9jV' -%} < h1 > {{ block . settings . heading }} </ h1 > {% endif %} {% endfor %} Anchor to Recommended blocks Recommended blocks You can highlight specific theme blocks in the block picker to make them easier to find. To do this, include the @theme block type along with your recommended blocks in the blocks array. In this example, the text , button , and _marquee blocks appear immediately in the picker. Other available theme blocks remain accessible by selecting Show all . Copy 9 1 2 3 4 5 6 \"blocks\" : [ { \"type\" : \"@theme\" } , { \"type\" : \"button\" } , { \"type\" : \"text\" } , { \"type\" : \"_marquee\" } ] Block picker with recommended blocks Anchor to Show dynamic block titles in the theme editor Show dynamic block titles in the theme editor In certain cases, the theme editor can dis"
+        },
+        {
+          "id": "chunk-13",
+          "text": "play an input setting value as the title of a block in the theme editor sidebar. This can help merchants to identify and rearrange blocks in a section. The theme editor checks the id values of the settings in a block to determine the best one to use for the block title. The theme editor uses settings with the following id values, in order of precedence: heading title text If a setting with a matching id value doesn&#x27;t exist, then the block name is used as the title. For example, this block with a setting id of heading displays in the sidebar with the title Welcome to our store . File Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 \"blocks\" : [ { \"name\" : \"Announcement\" , \"type\" : \"announcement\" , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"heading\" , \"default\" : \"Welcome to our store\" , \"label\" : \"Heading\" } ] } ] Anchor to max_blocks max_ blocks There&#x27;s a limit of 50 blocks per section"
+        },
+        {
+          "id": "chunk-14",
+          "text": ". You can specify a lower limit with the max_blocks attribute. Note Static blocks don&#x27;t count toward this limit. Note: Static blocks don&#x27;t count toward this limit. /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"max_blocks\" : 5 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] } { % endschema % } Example Anchor to presets presets Presets are predefined section configurations that merchants can select when adding sections to a JSON template . Presets help you quickly provide merchants with different layouts and use cases by adjusting section settings. For example, a"
+        },
+        {
+          "id": "chunk-15",
+          "text": "\"Testimonials\" section might include presets for a single testimonial, a carousel, and a grid layout. Note Section presets are different from the presets used to define theme presets in the settings_data.json file. Note: Section presets are different from the presets used to define theme presets in the settings_data.json file. Presets appear in the Add section picker as follows: Add section interface Number Description 1 Presets appear alphabetically based on their name attribute. 2 Presets can optionally be grouped into collapsible categories using the category attribute. 3 Uncategorized presets are always displayed first. 4 The theme editor automatically generates a preset preview. You can further customize this preview using visual preview mode . Section presets have the following attributes: Attribute Description Required name The preset name displayed in the theme editor&#x27;s Add"
+        },
+        {
+          "id": "chunk-16",
+          "text": "section picker and sidebar, and is persisted in the JSON template when you add a section. Yes category Groups related presets together in the theme editor&#x27;s Add section picker. No settings Default values for settings you want to pre-populate. Each entry includes the setting name and its value. No blocks Default blocks included in the preset. Each block entry must include a type attribute matching the block type, and a settings object formatted similarly to the settings attribute above. Optionally, include a name attribute to display when merchants add the block in the editor. No Here&#x27;s an example of how presets are defined within a section schema: /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"sl"
+        },
+        {
+          "id": "chunk-17",
+          "text": "ideshow\" , \"max_blocks\" : 5 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] , \"presets\" : [ { \"name\" : \"Slideshow\" , \"category\" : \"Banners\" , \"settings\" : { \"title\" : \"Slideshow\" } , \"blocks\" : [ { \"type\" : \"slide\" } , { \"type\" : \"slide\" } ] } ] } { % endschema % } Tip Sections with presets shouldn&#x27;t be statically rendered . If you&#x27;re going to statically render a section, then you should use default settings . Tip: Sections with presets shouldn&#x27;t be statically rendered . If you&#x27;re going to statically render a section, then you should use default settings . Anchor to default default If you statically render a section, then you can define a default configuration with the default object, which has the"
+        },
+        {
+          "id": "chunk-18",
+          "text": "same attributes as the preset object . The following is an example of including a default in a section: /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"max_blocks\" : 5 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] , \"default\" : { \"settings\" : { \"title\" : \"Slideshow\" } , \"blocks\" : [ { \"type\" : \"slide\" } , { \"type\" : \"slide\" } ] } } { % endschema % } Tip You should only use the section default attribute for sections that will be reused, or installed on multiple themes or shops. Statically rendered sections that come pre-installed on"
+        },
+        {
+          "id": "chunk-19",
+          "text": "a theme should have their default configuration defined by the default attribute for each individual setting. Tip: You should only use the section default attribute for sections that will be reused, or installed on multiple themes or shops. Statically rendered sections that come pre-installed on a theme should have their default configuration defined by the default attribute for each individual setting. Anchor to locales locales Sections can provide their own set of translated strings through the locales object. This is separate from the locales directory of the theme, which makes it a useful feature for sections that are meant to be installed on multiple themes or shops. The locales object has the following general format: General format Copy 9 1 2 3 4 5 6 7 { \"locales\" : { \"language\" : { \"translation_key\" : \"translation_value\" } } } For example: /sections/slideshow.liquid Copy 99 1 2 3"
+        },
+        {
+          "id": "chunk-20",
+          "text": "4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"max_blocks\" : 5 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] , \"default\" : { \"settings\" : { \"title\" : \"Slideshow\" } , \"blocks\" : [ { \"type\" : \"slide\" } , { \"type\" : \"slide\" } ] } , \"locales\" : { \"en\" : { \"title\" : \"Slideshow\" } , \"fr\" : { \"title\" : \"Diaporama\" } } } { % endschema % } Any translations will show up under the Sections tab of the language editor for merchants to edit. When edits are made, the changes are saved directly to the applicable locale file, and the section schema is unchanged. Th"
+        },
+        {
+          "id": "chunk-21",
+          "text": "ese translations can be accessed through the Liquid translation filter ( t filter) where the key will be in the following format: Copy 9 1 sections.[section-name].[translation-description] For example, if you want to reference the title translation from the example above, then use the following: Copy 9 1 {{ 'sections.slideshow.title' | t }} Anchor to enabled_on enabled_ on You can restrict a section to certain template page types and section group types by specifying them through the enabled_on attribute. enabled_on , along with disabled_on , replaces the templates attribute. Caution You can use only one of enabled_on or disabled_on . Caution: You can use only one of enabled_on or disabled_on . enabled_on must have at least one of the following attributes: enabled_on attributes Attribute Description templates A list of the template page types where the section can be used. Accepted value"
+        },
+        {
+          "id": "chunk-22",
+          "text": "s: A list of page types [\"*\"] (all template page types) groups A list of the section groups where the section can be used. Accepted values: A list of the section group types. Accepted values: header , footer , aside , and custom types in the format custom.<NAME> . [\"*\"] (all section group types) In the following example, the section is available to all templates, and to the footer section group: /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"max_blocks\" : 5 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\" , \"label\" : \"Slideshow\" } ] , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" }"
+        },
+        {
+          "id": "chunk-23",
+          "text": "] } ] , \"default\" : { \"settings\" : { \"title\" : \"Slideshow\" } , \"blocks\" : [ { \"type\" : \"slide\" } , { \"type\" : \"slide\" } ] } , \"locales\" : { \"en\" : { \"title\" : \"Slideshow\" } , \"fr\" : { \"title\" : \"Diaporama\" } } , \"enabled_on\" : { \"templates\" : [ \"*\" ] , \"groups\" : [ \"footer\" ] } } { % endschema % } Anchor to disabled_on disabled_ on You can prevent a section from being used on certain template page types and section group types by setting them in the disabled_on attribute. When you use disabled_on , the section is available to all templates and section groups except the ones that you specified. disabled_on , along with enabled_on , replaces the templates attribute. Caution You can use only one of enabled_on or disabled_on . Caution: You can use only one of enabled_on or disabled_on . disabled_on must have at least one of the following attributes: disabled_on attributes Attribute Descripti"
+        },
+        {
+          "id": "chunk-24",
+          "text": "on templates A list of the template page types where the section can&#x27;t be used. Accepted values: A list of page types [\"*\"] (all template page types) groups A list of the section groups where the section can&#x27;t be used. Accepted values: A list of the section group types. Accepted values: header , footer , aside , and custom types in the format custom.<NAME> . [\"*\"] (all section group types) In the following example, the section is available to all templates other than password templates, and to all section groups other than footer section groups. /sections/slideshow.liquid Copy 99 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 { % schema % } { \"name\" : \"Slideshow\" , \"tag\" : \"section\" , \"class\" : \"slideshow\" , \"max_blocks\" : 5 , \"settings\" : [ { \"type\" : \"text\" , \"id\" : \"title\""
+        },
+        {
+          "id": "chunk-25",
+          "text": ", \"label\" : \"Slideshow\" } ] , \"blocks\" : [ { \"name\" : \"Slide\" , \"type\" : \"slide\" , \"settings\" : [ { \"type\" : \"image_picker\" , \"id\" : \"image\" , \"label\" : \"Image\" } ] } ] , \"default\" : { \"settings\" : { \"title\" : \"Slideshow\" } , \"blocks\" : [ { \"type\" : \"slide\" } , { \"type\" : \"slide\" } ] } , \"locales\" : { \"en\" : { \"title\" : \"Slideshow\" } , \"fr\" : { \"title\" : \"Diaporama\" } } , \"disabled_on\" : { \"templates\" : [ \"password\" ] , \"groups\" : [ \"footer\" ] } } { % endschema % } Was this page helpful? Yes No name tag class limit settings blocks max_ blocks presets default locales enabled_ on disabled_ on Updates Developer changelog Shopify Editions Business growth Shopify Partners Program Shopify App Store Shopify Academy Legal Terms of service API terms of use Privacy policy Partners Program Agreement Shopify About Shopify Shopify Plus Careers Investors Press and media"
+        }
+      ],
+      "fetchedAt": "2026-04-02T11:57:54.284Z",
+      "lastIndexedAt": "2026-04-02T11:58:02.907Z",
+      "schemaSignals": {
+        "settings": true,
+        "blocks": true,
+        "presets": true,
+        "enabled_on": true,
+        "disabled_on": true,
+        "max_blocks": true
+      }
+    },
+    {
+      "id": "sections-architecture",
+      "topic": "sections-architecture",
+      "sourceUrl": "https://shopify.dev/docs/storefronts/themes/architecture/sections",
+      "title": "Sections",
+      "summary": "Sections Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best prac",
+      "keyRules": [
+        "Sections Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Migrating to Online Store 2.",
+        "They can also include blocks which allow merchants to add, remove, and reorder content within a section.",
+        "Sections that are included in JSON templates or section groups can support app blocks , which give merchants the option to include app content within a section without having to edit theme code.",
+        "Sections can also be included statically , which can provide merchants with in-context customization options for static content.",
+        "Anchor to Content Content Sections can contain three main types of content: Type Description Required Main content Any HTML or Liquid content you might want to include in the section.",
+        "This tag is used to define the following section attributes and settings: name tag class limit settings blocks app blocks max_blocks presets defaults locales enabled_on disabled_on To learn more, refer to Section schema .",
+        "Yes Anchor to Usage Usage When working with sections, you should familiarize yourself with the following: How to render a section How to integrate sections with the theme editor Support app blocks Anchor to Render a section Render a section You can render sections in one of the following ways: Reference the section in a JSON template , or a section group in a layout file.",
+        "Use the Section Rendering API ."
+      ],
+      "keywords": [
+        "you",
+        "can",
+        "editor",
+        "blocks",
+        "content",
+        "app",
+        "x27",
+        "templates",
+        "merchants",
+        "render",
+        "statically",
+        "block"
+      ],
+      "chunks": [
+        {
+          "id": "chunk-1",
+          "text": "Sections Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Mi"
+        },
+        {
+          "id": "chunk-2",
+          "text": "grating to Online Store 2. Login redirects Troubleshooting Sell themes Theme Store Full index Expand On this page Location Content Usage Sections Ask assistant Sections are Liquid files that allow you to create reusable modules of content that can be customized by merchants. They can also include blocks which allow merchants to add, remove, and reorder content within a section. For example, you can create an Image with text section that displays an image and text side-by-side with options for merchants to choose the image, set the text, and select the display order. Sections can be dynamically added to pages using JSON templates or section groups , giving merchants flexibility to easily customize page layouts. Sections that are included in JSON templates or section groups can support app blocks , which give merchants the option to include app content within a section without having to ed"
+        },
+        {
+          "id": "chunk-3",
+          "text": "it theme code. JSON templates and section groups can render up to 25 sections, and each section can have up to 50 blocks . Sections can also be included statically , which can provide merchants with in-context customization options for static content. By default, sections are available for any template or section group. You can limit which templates and section groups have access in the section schema . The following diagram shows the main theme architecture components with sections highlighted in blue and blocks highlighted in red: Anchor to Location Location Section files are located in the sections directory of the theme: Copy 9 1 2 3 4 5 └── theme ... ├── templates ├── sections ... Anchor to Content Content Sections can contain three main types of content: Type Description Required Main content Any HTML or Liquid content you might want to include in the section. Sections have the sam"
+        },
+        {
+          "id": "chunk-4",
+          "text": "e access to global objects , tags , and filters as other Liquid theme files, as well as the following section-specific objects: The section object - Contains the section&#x27;s properties and setting values. The block object - Contains the properties and setting values of a single section block. Aside from global objects, variables created outside of sections aren&#x27;t accessible within sections. The section and block objects, as well as variables created within sections, aren&#x27;t available outside of their respective section. The only exception is when you reference section and block objects within a snippet that&#x27;s rendered inside the section you&#x27;re referencing. No Assets Sections can bundle their own JavaScript and stylesheet assets with the following section-specific Liquid tags: {% javascript %} {% stylesheet %} To learn more, refer to Section assets . No Schema Sectio"
+        },
+        {
+          "id": "chunk-5",
+          "text": "ns support the {% schema %} Liquid tag. This tag is used to define the following section attributes and settings: name tag class limit settings blocks app blocks max_blocks presets defaults locales enabled_on disabled_on To learn more, refer to Section schema . Yes Anchor to Usage Usage When working with sections, you should familiarize yourself with the following: How to render a section How to integrate sections with the theme editor Support app blocks Anchor to Render a section Render a section You can render sections in one of the following ways: Reference the section in a JSON template , or a section group in a layout file. Statically render the section with the section Liquid tag. Use the Section Rendering API . Tip If you want to render sections inside a template, then use a JSON template. JSON templates provide more extensive customization options for merchants, and improve the t"
+        },
+        {
+          "id": "chunk-6",
+          "text": "heme editor&#x27;s performance. Tip: If you want to render sections inside a template, then use a JSON template. JSON templates provide more extensive customization options for merchants, and improve the theme editor&#x27;s performance. Anchor to Statically render a section Statically render a section Caution Whenever possible, you should avoid statically rendering sections. Instead, you should reference them in a JSON template or section group. Statically rendered sections can&#x27;t be removed or reordered by merchants. Caution: Whenever possible, you should avoid statically rendering sections. Instead, you should reference them in a JSON template or section group. Statically rendered sections can&#x27;t be removed or reordered by merchants. You can statically render a section using the Liquid section tag . For example, to include a section in a Liquid template , you can include it wit"
+        },
+        {
+          "id": "chunk-7",
+          "text": "h a section tag: /templates/customers/register.liquid Copy 9 1 {% section 'featured-product' %} Note You can include a statically rendered section in multiple theme files. However, only one instance of the section exists. If you change section settings in one location, then the change will be applied to all locations where the section is rendered. Note: You can include a statically rendered section in multiple theme files. However, only one instance of the section exists. If you change section settings in one location, then the change will be applied to all locations where the section is rendered. Anchor to Integrate sections with the theme editor Integrate sections with the theme editor When users customize sections and blocks through the theme editor, their HTML is dynamically added, removed, or re-rendered directly onto the existing DOM, without reloading the entire page. However, any"
+        },
+        {
+          "id": "chunk-8",
+          "text": "associated JavaScript that runs when the page loads won&#x27;t run again. Additionally, you must make sure that when a section or block is selected, that section or block becomes, and remains, visible while it’s selected. For example, a slideshow section should scroll into view when the section is selected, slide to a selected block (slide), and pause while that block is selected. To help identify theme editor actions like section and block selection or reordering, you can use the JavaScript events emitted by the theme editor. You might also want to prevent specific code from running in the theme editor. To do so, you can use Liquid and JavaScript variables for detecting the theme editor . Tip Section and block files must define presets in their schema to support being added to JSON templates using the theme editor. Files without presets should be included in the JSON file manually, and"
+        },
+        {
+          "id": "chunk-9",
+          "text": "can&#x27;t be removed using the theme editor. Tip: Section and block files must define presets in their schema to support being added to JSON templates using the theme editor. Files without presets should be included in the JSON file manually, and can&#x27;t be removed using the theme editor. Anchor to Support app blocks Support app blocks App blocks allow app developers to create blocks for merchants to add app content to their theme without having to directly edit theme code. To learn more about how to make your theme compatible with app blocks, refer to App blocks . Was this page helpful? Yes No Location Content Usage Updates Developer changelog Shopify Editions Business growth Shopify Partners Program Shopify App Store Shopify Academy Legal Terms of service API terms of use Privacy policy Partners Program Agreement Shopify About Shopify Shopify Plus Careers Investors Press and media"
+        }
+      ],
+      "fetchedAt": "2026-04-02T11:57:55.777Z",
+      "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+    }
+  ]
+}

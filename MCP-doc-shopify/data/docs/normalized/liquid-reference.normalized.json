@@ -1,0 +1,79 @@
+{
+  "id": "liquid-reference",
+  "topic": "liquid-reference",
+  "sourceUrl": "https://shopify.dev/docs/api/liquid",
+  "title": "Liquid reference",
+  "summary": "Liquid reference Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Collapse sidebar Liquid Overview What is a template language? Variations of Liquid Liquid basics Defining logic with tags Modifying output with filters Referencing objects Resources & tools Basics Tags Filters Objects",
+  "keyRules": [
+    "It&#x27;s available as an open source project on GitHub, and is used by many different software projects and companies.",
+    "This reference documents the Liquid tags, filters, and objects that you can use to build Shopify Themes .",
+    "Anchor to Variations of Liquid Variations of Liquid The variation of Liquid in this reference extends the open-source version of Liquid for use with Shopify themes .",
+    "It includes tags, filters, and objects that can be used to render objects specific to Shopify stores and storefront functionality.",
+    "Shopify also uses slightly different versions of Liquid to render dynamic content for the following features.",
+    "These variations aren’t included in this reference.",
+    "Notification templates Notification templates Notification templates Shopify Flow Shopify Flow Shopify Flow Order printer templates Order printer templates Order printer templates Packing slip templates Packing slip templates Packing slip templates Anchor to Liquid basics Liquid basics Liquid is used to dynamically output objects and their properties.",
+    "Liquid also includes basic logical and comparison operators for use with tags."
+  ],
+  "keywords": [
+    "product",
+    "code",
+    "output",
+    "title",
+    "health",
+    "potion",
+    "objects",
+    "x27",
+    "tags",
+    "filters",
+    "anchor",
+    "templates"
+  ],
+  "chunks": [
+    {
+      "id": "chunk-1",
+      "text": "Liquid reference Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Collapse sidebar Liquid Overview What is a template language? Variations of Liquid Liquid basics Defining logic with tags Modifying output with filters Referencing objects Resources & tools Basics Tags Filters Objects Full index Liquid reference Liquid is a template language created by Shopify. It&#x27;s available as an open source project on GitHub, and is used by many different software projects and companies. This reference documents the Liquid tags, filters, and objects that you can use to build Shopify Themes . Ask assistant Anchor to What is a template language? What is a template language? A template language allows you to create a single template to host static content, and dynamically insert information depending on where the template is rendered. For example, you can create a"
+    },
+    {
+      "id": "chunk-2",
+      "text": "product template that hosts all of your standard product attributes, such as the product image, title, and price. That template can then dynamically render those attributes with the appropriate content, depending on the current product being viewed. Anchor to Variations of Liquid Variations of Liquid The variation of Liquid in this reference extends the open-source version of Liquid for use with Shopify themes . It includes tags, filters, and objects that can be used to render objects specific to Shopify stores and storefront functionality. Shopify also uses slightly different versions of Liquid to render dynamic content for the following features. These variations aren’t included in this reference. Notification templates Notification templates Notification templates Shopify Flow Shopify Flow Shopify Flow Order printer templates Order printer templates Order printer templates Packing sli"
+    },
+    {
+      "id": "chunk-3",
+      "text": "p templates Packing slip templates Packing slip templates Anchor to Liquid basics Liquid basics Liquid is used to dynamically output objects and their properties. You can further modify that output by creating logic with tags, or directly altering it with a filter. Objects and object properties are output using one of six basic data types. Liquid also includes basic logical and comparison operators for use with tags. Navigate to Basics Navigate to Basics Navigate to - Basics Code Reset Code 9 1 2 3 4 5 6 < title > {{ page_title }} </ title > {% if page_description -%} < meta name = \"description\" content = \" {{ page_description | truncate : 150 }} \" > {%- endif %} Code <title> {{ page_title }} </title> {% if page_description -%} <meta name=\"description\" content=\"{{ page_description | truncate: 150 }}\"> {%- endif %} Output 9 1 2 3 4 < title > Health potion </ title > < meta name = \"descrip"
+    },
+    {
+      "id": "chunk-4",
+      "text": "tion\" content = \"Are you low on health? Well we've got the potion just for you! Just need a top up? Almost dead? In between? No need to worry because we have a ...\" > Output <title> Health potion </title> <meta name=\"description\" content=\"Are you low on health? Well we&#x27;ve got the potion just for you! Just need a top up? Almost dead? In between? No need to worry because we have a ...\"> Anchor to Defining logic with tags Defining logic with tags Liquid tags are used to define logic that tells templates what to do. Tags are wrapped with curly brace percentage delimiters {% %} . The text within the delimiters is an instruction, not content to render. In the example to the right, the if tag defines the condition to be met. If product.available returns true , then the price is displayed. Otherwise, the “sold out” message is shown. {% %} To nest multiple tags inside one set of delimiters,"
+    },
+    {
+      "id": "chunk-5",
+      "text": "use the liquid tag. Code Data Reset Code 9 1 2 3 4 5 {% if product . available %} Price: $99.99 {% else %} Sorry, this product is sold out. {% endif %} Code {% if product.available %} Price: $99.99 {% else %} Sorry, this product is sold out. {% endif %} Data { \"product\": { \"available\": true } } Output 9 1 Price: $99.99 Output Price: $99.99 Anchor to Tags with parameters Tags with parameters Some tags accept parameters: either required or optional. For example, the for tag takes an optional limit parameter to stop the loop at a specific index. Code Reset Code 9 1 2 3 4 5 {% assign numbers = '1,2,3,4,5' | split : ',' %} {% for item in numbers limit : 2 -%} {{ item }} {% endfor %} Code {% assign numbers = &#x27;1,2,3,4,5&#x27; | split: &#x27;,&#x27; %} {% for item in numbers limit:2 -%} {{ item }} {% endfor %} Output 9 1 2 1 2 Output 1 2 Anchor to Modifying output with filters Modifying out"
+    },
+    {
+      "id": "chunk-6",
+      "text": "put with filters Liquid filters modify the output of variables and objects. To filter the output of a tag, use the pipe character | , followed by the filter. In this example, product is the object, title is its property, and upcase is the filter. Code Data Reset Code 9 1 2 3 {% # product.title -> Health potion %} {{ product . title | upcase }} Code {% # product.title -> Health potion %} {{ product.title | upcase }} Data { \"product\": { \"title\": \"Health potion\" } } Output 9 1 HEALTH POTION Output HEALTH POTION Anchor to Filters with parameters Filters with parameters Many filters accept parameters that adjust their output. Some parameters are required, others are optional. Code Data Reset Code 9 1 2 3 {% # product.title -> Health potion %} {{ product . title | remove : 'Health' }} Code {% # product.title -> Health potion %} {{ product.title | remove: &#x27;Health&#x27; }} Data { \"product\":"
+    },
+    {
+      "id": "chunk-7",
+      "text": "{ \"title\": \"Health potion\" } } Output 9 1 potion Output potion Anchor to Using multiple filters Using multiple filters Multiple filters can be used on one output. They&#x27;re applied from left to right. Code Data Reset Code 9 1 2 3 {% # product.title -> Health potion %} {{ product . title | upcase | remove : 'HEALTH' }} Code {% # product.title -> Health potion %} {{ product.title | upcase | remove: &#x27;HEALTH&#x27; }} Data { \"product\": { \"title\": \"Health potion\" } } Output 9 1 POTION Output POTION Anchor to Referencing objects Referencing objects Liquid objects represent variables that you can use to build your theme. Object types include, but aren&#x27;t limited to: Store resources, such as a collection or product and its properties Standard content that is used to power Shopify themes, such as content_for_header Functional elements that can be used to build interactivity, such as p"
+    },
+    {
+      "id": "chunk-8",
+      "text": "aginate and search Objects might represent a single data point, or contain multiple properties. Some products might represent a related object, such as a product in a collection. {{ }} Double curly brace delimiters denote an output. Anchor to Usage Usage To output an object, wrap it in curly brace delimiters {{ }} . To output an object&#x27;s property, use dot notation. This example outputs the product object&#x27;s title property. Code Data Reset Code 9 1 {{ product . title }} Code {{ product.title }} Data { \"product\": { \"title\": \"Health potion\" } } Output 9 1 Health potion Output Health potion Anchor to Object access Object access Objects can be accessed in three ways: Globally : Available in any Liquid file, excluding checkout.liquid and Liquid asset files In templates : Available in specific templates and their sections or blocks. For example, the product object in a product template"
+    },
+    {
+      "id": "chunk-9",
+      "text": "Through parent objects : Returned as properties of other objects. For example, article objects through articles or blog Check each object&#x27;s documentation to see how it can be accessed. Anchor to Creating variables Creating variables To create your own variables, use variable tags like assign or capture . Syntactically, Liquid treats variables the same as objects. Code Reset Code 9 1 2 {% assign my_variable = 'My custom string.' %} {{ my_variable }} Code {% assign my_variable = &#x27;My custom string.&#x27; %} {{ my_variable }} Output 9 1 My custom string. Output My custom string. Anchor to Resources & tools Resources & tools Liquid Cheat Sheet A simple reference guide to the Liquid language. Liquid Cheat Sheet A simple reference guide to the Liquid language. Liquid Cheat Sheet A simple reference guide to the Liquid language. Theme Check Command line-based linter for themes. Also co"
+    },
+    {
+      "id": "chunk-10",
+      "text": "mes as an official Visual Studio Code extension. Theme Check Command line-based linter for themes. Also comes as an official Visual Studio Code extension. Theme Check Command line-based linter for themes. Also comes as an official Visual Studio Code extension. Shopify CLI for Themes A powerful command-line tool for building Shopify themes, and exploring Liquid code in a REPL interface. Shopify CLI for Themes A powerful command-line tool for building Shopify themes, and exploring Liquid code in a REPL interface. Shopify CLI for Themes A powerful command-line tool for building Shopify themes, and exploring Liquid code in a REPL interface. Open source liquid Liquid is an open source project on GitHub. Open source liquid Liquid is an open source project on GitHub. Open source liquid Liquid is an open source project on GitHub. Was this page helpful? Yes No Updates Developer changelog Shopify"
+    },
+    {
+      "id": "chunk-11",
+      "text": "Editions Business growth Shopify Partners Program Shopify App Store Shopify Academy Legal Terms of service API terms of use Privacy policy Partners Program Agreement Shopify About Shopify Shopify Plus Careers Investors Press and media"
+    }
+  ],
+  "fetchedAt": "2026-04-02T11:57:56.325Z",
+  "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+}
