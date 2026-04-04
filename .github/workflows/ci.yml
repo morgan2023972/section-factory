@@ -33,11 +33,12 @@ jobs:
       - name: Run coverage
         run: npm run coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: true
+          name: coverage-lcov
+          path: coverage/lcov.info
+          if-no-files-found: error
 
       - name: Build project
         run: npm run build
