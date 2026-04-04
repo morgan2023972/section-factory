@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 
 import { INDEX_FILE, INDEX_SNAPSHOT_FILE } from "./paths.js";
 import type { ShopifyDocsIndex } from "./types.js";
+import { coerceShopifyDocsIndex } from "./normalizedDocCompatibility.js";
 
 function emptyIndex(reason: string): ShopifyDocsIndex {
   console.warn(`[index] ${reason}`);
@@ -17,7 +18,8 @@ function emptyIndex(reason: string): ShopifyDocsIndex {
 function tryReadIndex(filePath: string): ShopifyDocsIndex | null {
   try {
     const text = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(text) as ShopifyDocsIndex;
+    const parsed = JSON.parse(text) as unknown;
+    return coerceShopifyDocsIndex(parsed);
   } catch {
     return null;
   }

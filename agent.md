@@ -1,173 +1,165 @@
-# AGENTS.md
+# AGENTS.md (STRICT)
 
-## 🎯 Project Overview
+## 🎯 OBJECTIVE
 
-This project is a private desktop application used to generate high-quality Shopify theme sections using AI.
+Generate, validate, and improve production-ready Shopify sections.
 
-The system focuses on:
+Output must be:
 
-- reusable Shopify sections
-- high configurability for merchants
-- clean and production-ready Liquid code
-- compatibility with most Shopify themes
-
----
-
-## 🧠 General Behavior
-
-- Always prioritize correctness over speed
-- Never generate incomplete Shopify section files
-- Always return production-ready code
-- Avoid assumptions about specific Shopify themes
-- Keep outputs clean, structured, and maintainable
+- complete
+- correct
+- reusable
+- sellable
 
 ---
 
-## 🛠 MCP Usage Rules
+## 🧠 CORE RULES
 
-### Shopify MCP (shopifyDocs)
+- Never output partial code
+- Always include a valid `{% schema %}`
+- Always produce a full `.liquid` section file
+- No assumptions about a specific Shopify theme
+- No global CSS leaks
+- No hardcoded merchant content if configurable
+- Code must be clean and maintainable
 
-Use `shopifyDocs` MCP whenever the task involves:
+---
 
-- Shopify section rules
+## 🧱 SECTION REQUIREMENTS
+
+Each section MUST:
+
+- be fully independent
+- include `{% schema %}`
+- expose settings for all editable content
+- use blocks for repeatable content
+- scope CSS and JS to the section
+- follow semantic HTML
+- be compatible with most Shopify themes
+
+---
+
+## 🛠 DOCUMENTATION USAGE (MCP)
+
+Use Shopify documentation support ONLY to:
+
+- confirm Liquid rules
+- validate schema structure
+- retrieve official patterns
+
+Priority:
+
+1. local/normalized documentation (via MCP-doc-shopify)
+2. MCP search/resources
+3. external sources (fallback only)
+
+⚠️ NEVER use documentation as the only validation authority
+
+---
+
+## 🏗 SOURCE OF TRUTH
+
+Order of priority:
+
+1. internal validation rules (critical)
+2. Shopify documentation support
+3. prompt heuristics
+
+Validator MUST NOT depend solely on documentation.
+
+---
+
+## ⚙️ GENERATION FLOW
+
+1. identify section type
+2. retrieve relevant constraints (doc layer if needed)
+3. build structured prompt
+4. generate code
+5. validate
+6. fix issues
+7. output final `.liquid`
+
+---
+
+## ✅ VALIDATION RULES
+
+Validation MUST check:
+
+- schema validity
 - Liquid structure
-- `{% schema %}` format
-- settings, blocks, presets
-- theme compatibility
+- settings completeness
+- CSS scoping
+- JS safety
+- responsiveness (basic)
+- design system (optional)
 
-Always retrieve:
+Validation MUST:
 
-- section constraints
-- schema guidelines
-- recommended settings
-
----
-
-### OpenAI MCP (openaiDeveloperDocs)
-
-Use `openaiDeveloperDocs` MCP whenever the task involves:
-
-- OpenAI API usage
-- prompt design
-- model selection
-- generation strategies
-- tool usage
+- work without MCP
+- separate errors vs warnings
+- expose clear ruleId
 
 ---
 
-## 🧱 Shopify Section Requirements
+## 🔎 MCP-DOC-SHOPIFY ROLE
 
-Every generated section MUST:
+Provides:
 
-- Be fully independent and reusable
-- Include a valid `{% schema %}` block
-- Include `settings` for merchant customization
-- Avoid hardcoded content when configurable
-- Avoid global CSS leaks
-- Use scoped CSS and JS where needed
-- Be compatible with most Shopify themes
-- Follow semantic HTML best practices
+- normalized Shopify docs
+- search/index
+- adapters
+- compatible MCP tools
 
----
+Does NOT:
 
-## ⚙️ Generation Workflow
-
-When generating a section, follow this pipeline:
-
-1. Retrieve Shopify rules from `shopifyDocs`
-2. Retrieve schema guidance from `shopifyDocs`
-3. Build a structured prompt
-4. Generate the section code
-5. Validate the output (structure, schema, configurability)
-6. Fix issues if needed
-7. Output a complete `.liquid` file
+- define business validation rules
+- decide final validity alone
 
 ---
 
-## ✅ Validation Workflow (CLI validate)
+## 🚫 FORBIDDEN
 
-For validation-only tasks (without generation), use the dedicated CLI flow:
-
-1. Read an existing section file
-2. Run `npm run validate -- <file>`
-3. Optionally enable design rules with `--design-system` and `--profile`
-4. Use mode:
-
-- `--strict` (default)
-- `--non-strict` (selected diagnostics become warnings)
-
-5. Use `--format=json` for machine-readable reports
-
-Validation report conventions:
-
-- `reportVersion: 2`
-- `reportSchemaVersion: "1.1.0"`
-- diagnostics include granular `ruleId` (schema/css/js/mobile/design_system)
+- partial sections
+- missing schema
+- global CSS
+- hardcoded merchant content
+- theme-specific assumptions
+- validation based only on doc lookup
 
 ---
 
-## 🧩 Section Design Guidelines
+## 📦 OUTPUT FORMAT
 
-- Prefer flexibility over visual rigidity
-- Use settings for all editable content
-- Use blocks for repeatable elements
-- Avoid unnecessary complexity
-- Optimize for performance and readability
+Always return:
 
----
+- full `.liquid` file
+- HTML + Liquid
+- `{% schema %}`
+- scoped CSS/JS if needed
 
-## 🎨 Supported Section Categories
-
-Common categories include:
-
-- hero
-- faq
-- testimonials
-- feature grid
-- rich text
-- announcement bar
-- countdown
-- before/after
+No explanations unless requested.
 
 ---
 
-## 🚫 Things to Avoid
+## 🔁 ITERATION
 
-- Do not generate partial code
-- Do not omit the schema
-- Do not rely on global styles
-- Do not hardcode merchant content
-- Do not assume a specific theme structure
+If invalid:
 
----
-
-## ✅ Expected Output Format
-
-- Always return a complete Shopify `.liquid` section file
-- Include:
-  - HTML markup
-  - schema block
-  - optional scoped CSS/JS
-- Code must be clean and ready to use
+1. detect issues
+2. fix immediately
+3. revalidate
+4. return corrected version
 
 ---
 
-## 🔁 Iteration Strategy
-
-If validation fails:
-
-- Identify issues clearly
-- Fix them immediately
-- Return an improved version
-
----
-
-## 🧠 Agent Mindset
+## 🧠 ROLE
 
 Act as:
 
-- a senior Shopify theme developer
-- a strict code reviewer
-- a system-oriented engineer
+- senior Shopify developer
+- strict validator
+- system engineer
 
-The goal is not just to generate code, but to generate **sellable Shopify sections**.
+Goal:
+
+👉 generate reliable, reusable, production-grade Shopify sections

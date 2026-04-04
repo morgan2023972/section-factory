@@ -3,8 +3,8 @@
   "topic": "schema",
   "sourceUrl": "https://shopify.dev/docs/storefronts/themes/architecture/sections/section-schema",
   "title": "Section schema",
-  "summary": "Section schema Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Bes",
-  "keyRules": [
+  "documentSummary": "Section schema Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Bes",
+  "ruleCandidates": [
     "Section schema Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Migrating to Online Store 2.",
     "However, it doesn&#x27;t output its contents, or render any Liquid included inside it.",
     "However, it doesn&#x27;t output its contents, or render any Liquid included inside it.",
@@ -131,8 +131,8 @@
     }
   ],
   "fetchedAt": "2026-04-02T11:57:54.284Z",
-  "lastIndexedAt": "2026-04-02T11:58:02.907Z",
-  "schemaSignals": {
+  "lastIndexedAt": "2026-04-03T16:43:14.543Z",
+  "schemaHints": {
     "settings": true,
     "blocks": true,
     "presets": true,

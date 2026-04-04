@@ -3,8 +3,8 @@
   "topic": "liquid-reference",
   "sourceUrl": "https://shopify.dev/docs/api/liquid",
   "title": "Liquid reference",
-  "summary": "Liquid reference Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Collapse sidebar Liquid Overview What is a template language? Variations of Liquid Liquid basics Defining logic with tags Modifying output with filters Referencing objects Resources & tools Basics Tags Filters Objects",
-  "keyRules": [
+  "documentSummary": "Liquid reference Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Collapse sidebar Liquid Overview What is a template language? Variations of Liquid Liquid basics Defining logic with tags Modifying output with filters Referencing objects Resources & tools Basics Tags Filters Objects",
+  "ruleCandidates": [
     "It&#x27;s available as an open source project on GitHub, and is used by many different software projects and companies.",
     "This reference documents the Liquid tags, filters, and objects that you can use to build Shopify Themes .",
     "Anchor to Variations of Liquid Variations of Liquid The variation of Liquid in this reference extends the open-source version of Liquid for use with Shopify themes .",
@@ -75,5 +75,5 @@
     }
   ],
   "fetchedAt": "2026-04-02T11:57:56.325Z",
-  "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+  "lastIndexedAt": "2026-04-03T16:43:14.543Z"
 }

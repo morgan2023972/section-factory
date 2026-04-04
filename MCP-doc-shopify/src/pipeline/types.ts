@@ -27,6 +27,24 @@ export interface RawDocFile {
 export interface NormalizedDocChunk {
   id: string;
   text: string;
+  sectionHint?: string;
+}
+
+export interface NormalizedDocNormalizationMetadata {
+  // "1.0-legacy" is used when reading historical normalized docs.
+  formatVersion: "1.0-legacy" | "1.1";
+  parser: "legacy-flat" | "structured-html";
+  blockCount: number;
+  hasSectionHints: boolean;
+  qualityFlags: string[];
+  ruleCandidateSignals?: NormalizedDocRuleCandidateSignal[];
+}
+
+export interface NormalizedDocRuleCandidateSignal {
+  text: string;
+  score: number;
+  confidence: "low" | "medium" | "high";
+  sectionHint?: string;
 }
 
 export interface NormalizedDocFile {
@@ -34,13 +52,16 @@ export interface NormalizedDocFile {
   topic: ShopifyDocTopic;
   sourceUrl: string;
   title: string;
-  summary: string;
-  keyRules: string[];
+  // Documentary excerpt only; never a normative validation source.
+  documentSummary: string;
+  // Extracted from docs; candidates are informative and non-authoritative.
+  ruleCandidates: string[];
   keywords: string[];
   chunks: NormalizedDocChunk[];
   fetchedAt: string;
   lastIndexedAt: string;
-  schemaSignals?: {
+  // Documentary schema hints only; never sufficient for critical decisions.
+  schemaHints?: {
     settings: boolean;
     blocks: boolean;
     presets: boolean;
@@ -48,6 +69,8 @@ export interface NormalizedDocFile {
     disabled_on: boolean;
     max_blocks: boolean;
   };
+  // Optional compatibility-first metadata for richer documentary processing.
+  normalization?: NormalizedDocNormalizationMetadata;
 }
 
 export interface FetchManifest {

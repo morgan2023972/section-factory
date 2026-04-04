@@ -1,4 +1,5 @@
 import { readLocalDocsIndexSafe } from "../pipeline/readLocalIndex.js";
+import { buildConvergedDocsIndex } from "./convergedDocsIndex.js";
 import type {
   NormalizedDocFile,
   ShopifyDocsIndex,
@@ -13,7 +14,7 @@ export interface LocalDocsIndexSummary {
 }
 
 export function readLocalDocsIndex(): ShopifyDocsIndex {
-  return readLocalDocsIndexSafe();
+  return buildConvergedDocsIndex(readLocalDocsIndexSafe());
 }
 
 export function readLocalDocsIndexSummary(): LocalDocsIndexSummary {

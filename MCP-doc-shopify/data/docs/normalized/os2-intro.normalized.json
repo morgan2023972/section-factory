@@ -3,8 +3,8 @@
   "topic": "os2-compatibility",
   "sourceUrl": "https://shopify.dev/docs/storefronts/themes/architecture",
   "title": "Theme architecture",
-  "summary": "Theme architecture Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales",
-  "keyRules": [
+  "documentSummary": "Theme architecture Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales",
+  "ruleCandidates": [
     "Theme architecture Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Migrating to Online Store 2.",
     "Note If you&#x27;re building a theme for the Shopify Theme Store , then you need to meet certain requirements for the customization options that your theme offers, your theme&#x27;s style, and the features that you include.",
     "Note: If you&#x27;re building a theme for the Shopify Theme Store , then you need to meet certain requirements for the customization options that your theme offers, your theme&#x27;s style, and the features that you include.",
@@ -87,5 +87,5 @@
     }
   ],
   "fetchedAt": "2026-04-02T11:57:58.320Z",
-  "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+  "lastIndexedAt": "2026-04-03T16:43:14.543Z"
 }

@@ -39,6 +39,7 @@ test("fallback local does not block prompt and validation payloads", () => {
     validation.rules.some((rule) => rule.id === "schema-required"),
     true,
   );
+  assert.equal(typeof validation.report?.verdict, "string");
 });
 
 test("MCP tool contracts remain stable for legacy tools", () => {

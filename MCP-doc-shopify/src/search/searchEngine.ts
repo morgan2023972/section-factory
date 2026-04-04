@@ -14,6 +14,27 @@ import type {
 const DEFAULT_LIMIT = 5;
 const MAX_LIMIT = 20;
 
+const CATEGORY_TOPIC_AFFINITY: Readonly<
+  Record<string, Partial<Record<ShopifyDocTopic, number>>>
+> = {
+  hero: {
+    "sections-architecture": 1.35,
+    schema: 1.2,
+    "json-templates": 1.05,
+    "liquid-reference": 0.9,
+  },
+  faq: {
+    schema: 1.25,
+    "sections-architecture": 1.15,
+    "liquid-reference": 0.95,
+  },
+  testimonial: {
+    "sections-architecture": 1.25,
+    schema: 1.1,
+    "liquid-reference": 0.95,
+  },
+};
+
 function normalizeText(value: string): string {
   return value.toLowerCase().trim();
 }
@@ -36,6 +57,14 @@ function countTermHits(text: string, terms: string[]): number {
   }
 
   return hits;
+}
+
+function termCoverageRatio(text: string, terms: string[]): number {
+  if (terms.length === 0) {
+    return 0;
+  }
+
+  return countTermHits(text, terms) / terms.length;
 }
 
 function mapFilterToTopics(
@@ -61,23 +90,62 @@ function docUri(doc: NormalizedDocFile): string {
   return `shopify://docs/${doc.id}`;
 }
 
+function trimSnippet(input: string, maxLength = 240): string {
+  const clean = input.replace(/\s+/g, " ").trim();
+  if (clean.length <= maxLength) {
+    return clean;
+  }
+
+  const window = clean.slice(0, maxLength + 1);
+  const lastSpace = window.lastIndexOf(" ");
+  if (lastSpace > Math.floor(maxLength * 0.6)) {
+    return window.slice(0, lastSpace).trim();
+  }
+
+  return clean.slice(0, maxLength).trim();
+}
+
 function makeSnippet(doc: NormalizedDocFile, terms: string[]): string {
-  const summary = doc.summary.trim();
-  const summaryHits = countTermHits(summary, terms);
+  const documentSummary = doc.documentSummary.trim();
+  const summaryScore =
+    countTermHits(documentSummary, terms) * 2 +
+    termCoverageRatio(documentSummary, terms);
 
   let bestChunk = "";
-  let bestChunkHits = -1;
+  let bestChunkScore = -1;
   for (const chunk of doc.chunks) {
-    const hits = countTermHits(chunk.text, terms);
-    if (hits > bestChunkHits) {
+    const chunkCoverage = termCoverageRatio(chunk.text, terms);
+    const chunkScore =
+      countTermHits(chunk.text, terms) * 2 +
+      chunkCoverage +
+      (chunk.sectionHint ? 0.2 : 0);
+
+    if (chunkScore > bestChunkScore) {
       bestChunk = chunk.text;
-      bestChunkHits = hits;
+      bestChunkScore = chunkScore;
     }
   }
 
-  const source = bestChunkHits > summaryHits ? bestChunk : summary;
-  const snippet = source.slice(0, 240).trim();
+  const source = bestChunkScore > summaryScore ? bestChunk : documentSummary;
+  const snippet = trimSnippet(source, 240);
   return snippet.length > 0 ? snippet : "No snippet available.";
+}
+
+function applyCategoryTopicAffinity(
+  score: number,
+  docTopic: ShopifyDocTopic,
+  sectionCategory?: string,
+): number {
+  if (!sectionCategory) {
+    return score;
+  }
+
+  const affinity = CATEGORY_TOPIC_AFFINITY[normalizeText(sectionCategory)];
+  if (!affinity) {
+    return score;
+  }
+
+  return score * (affinity[docTopic] ?? 1);
 }
 
 function scoreDocument(
@@ -89,45 +157,75 @@ function scoreDocument(
   let score = 0;
 
   const titleHits = countTermHits(doc.title, terms);
-  const summaryHits = countTermHits(doc.summary, terms);
+  const summaryHits = countTermHits(doc.documentSummary, terms);
   const keywordsHits = countTermHits(doc.keywords.join(" "), terms);
   const chunkHits = doc.chunks.reduce(
     (acc, chunk) => acc + countTermHits(chunk.text, terms),
     0,
   );
 
+  const titleCoverage = termCoverageRatio(doc.title, terms);
+  const summaryCoverage = termCoverageRatio(doc.documentSummary, terms);
+  const keywordsCoverage = termCoverageRatio(doc.keywords.join(" "), terms);
+
+  const tokenCount = Math.max(
+    1,
+    `${doc.title} ${doc.documentSummary} ${doc.chunks
+      .map((chunk) => chunk.text)
+      .join(" ")}`
+      .split(/\s+/)
+      .filter((token) => token.length > 0).length,
+  );
+  const lengthNormalization = Math.sqrt(Math.min(tokenCount, 2000) / 120);
+
   score += titleHits * 8;
   score += summaryHits * 4;
   score += keywordsHits * 6;
-  score += Math.min(chunkHits, 10) * 2;
+  score += Math.min(chunkHits, 12) * 2;
+  score += titleCoverage * 6;
+  score += summaryCoverage * 3;
+  score += keywordsCoverage * 2;
+
+  const hasAllTermsInTitle = terms.every((term) =>
+    normalizeText(doc.title).includes(term),
+  );
+  if (hasAllTermsInTitle) {
+    score += 4;
+  }
+
+  score = score / Math.max(lengthNormalization, 1);
 
   if (topicFilter) {
-    score += 5;
+    score += 4;
 
     if (topicFilter === "blocks") {
       score +=
-        countTermHits(`${doc.summary} ${doc.keywords.join(" ")}`, ["blocks"]) *
-        2;
+        countTermHits(`${doc.documentSummary} ${doc.keywords.join(" ")}`, [
+          "blocks",
+        ]) * 2;
     }
 
     if (topicFilter === "presets") {
       score +=
-        countTermHits(`${doc.summary} ${doc.keywords.join(" ")}`, ["presets"]) *
-        2;
+        countTermHits(`${doc.documentSummary} ${doc.keywords.join(" ")}`, [
+          "presets",
+        ]) * 2;
     }
   }
 
   if (sectionCategory) {
     const categoryHits = countTermHits(
-      `${doc.title} ${doc.summary} ${doc.keywords.join(" ")} ${doc.chunks
+      `${doc.title} ${doc.documentSummary} ${doc.keywords.join(" ")} ${doc.chunks
         .map((chunk) => chunk.text)
         .join(" ")}`,
       [normalizeText(sectionCategory)],
     );
-    score += categoryHits > 0 ? 2 : 0;
+    score += categoryHits > 0 ? 2.5 : 0;
   }
 
-  return score;
+  score = applyCategoryTopicAffinity(score, doc.topic, sectionCategory);
+
+  return Number(score.toFixed(3));
 }
 
 function clampLimit(limit?: number): number {

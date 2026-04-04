@@ -41,3 +41,9 @@ jobs:
 
       - name: Build project
         run: npm run build
+
+      - name: Validate MCP-doc-shopify (clean install, tests, build)
+        run: |
+          npm ci --prefix MCP-doc-shopify
+          npm test --prefix MCP-doc-shopify
+          npm run build --prefix MCP-doc-shopify

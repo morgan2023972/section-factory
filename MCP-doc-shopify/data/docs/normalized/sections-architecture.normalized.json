@@ -3,8 +3,8 @@
   "topic": "sections-architecture",
   "sourceUrl": "https://shopify.dev/docs/storefronts/themes/architecture/sections",
   "title": "Sections",
-  "summary": "Sections Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best prac",
-  "keyRules": [
+  "documentSummary": "Sections Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best prac",
+  "ruleCandidates": [
     "Sections Skip to main content Apps Storefronts Agents References Ask assistant / Help • Log in Storefronts Overview Themes Web API / Headless Mobile Collapse sidebar Getting started Overview Quick start Key concepts Architecture Layouts Templates Sections Section groups Blocks Snippets Settings Config Locales Best practices Overview Sections and blocks Java Script and stylesheet tags Performance Accessibility Theme editor Design Merchant stores Version control File transformation Deceptive code Developer Tools Overview CLI Git Hub integration VS Code extension Prettier plugin Liquid Doc Theme Check Theme editor Code editor Theme Access app Dev stores Collaborator accounts Theme Inspector Lighthouse CI Theme features Overview Integrating apps Product merchandising Pricing and payments Delivery and fulfillment Customer engagement Markets Site navigation and search SEO Trust and security Migrating to Online Store 2.",
     "They can also include blocks which allow merchants to add, remove, and reorder content within a section.",
     "Sections that are included in JSON templates or section groups can support app blocks , which give merchants the option to include app content within a section without having to edit theme code.",
@@ -67,5 +67,5 @@
     }
   ],
   "fetchedAt": "2026-04-02T11:57:55.777Z",
-  "lastIndexedAt": "2026-04-02T11:58:02.907Z"
+  "lastIndexedAt": "2026-04-03T16:43:14.543Z"
 }

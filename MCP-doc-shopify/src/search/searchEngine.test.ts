@@ -16,9 +16,12 @@ function mockIndex(): ShopifyDocsIndex {
         topic: "schema",
         sourceUrl: "https://shopify.dev/docs/a",
         title: "Section schema settings and blocks",
-        summary:
+        documentSummary:
           "Schema rules include settings, blocks, presets, enabled_on and max_blocks for robust section architecture.",
-        keyRules: ["Use settings and blocks.", "Include presets in schema."],
+        ruleCandidates: [
+          "Use settings and blocks.",
+          "Include presets in schema.",
+        ],
         keywords: ["schema", "settings", "blocks", "presets"],
         chunks: [
           {
@@ -28,7 +31,7 @@ function mockIndex(): ShopifyDocsIndex {
         ],
         fetchedAt: "2026-04-02T00:00:00.000Z",
         lastIndexedAt: "2026-04-02T00:00:00.000Z",
-        schemaSignals: {
+        schemaHints: {
           settings: true,
           blocks: true,
           presets: true,
@@ -42,9 +45,9 @@ function mockIndex(): ShopifyDocsIndex {
         topic: "sections-architecture",
         sourceUrl: "https://shopify.dev/docs/b",
         title: "Theme sections architecture",
-        summary:
+        documentSummary:
           "Sections architecture explains templates and reusable components.",
-        keyRules: ["Use modular sections."],
+        ruleCandidates: ["Use modular sections."],
         keywords: ["sections", "architecture", "templates"],
         chunks: [
           {
@@ -60,8 +63,8 @@ function mockIndex(): ShopifyDocsIndex {
         topic: "liquid-reference",
         sourceUrl: "https://shopify.dev/docs/c",
         title: "Liquid reference",
-        summary: "Reference for liquid filters and tags.",
-        keyRules: ["Use liquid filters carefully."],
+        documentSummary: "Reference for liquid filters and tags.",
+        ruleCandidates: ["Use liquid filters carefully."],
         keywords: ["liquid", "filters", "tags"],
         chunks: [
           {

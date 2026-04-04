@@ -36,12 +36,12 @@ function docsToPromptHints(
   limit = 3,
 ): string[] {
   return docs.slice(0, limit).map((doc) => {
-    const ruleHints = doc.keyRules.slice(0, 2).join(" | ");
-    const schemaHints = doc.schemaSignals
-      ? `schema-signals settings=${doc.schemaSignals.settings} blocks=${doc.schemaSignals.blocks} presets=${doc.schemaSignals.presets}`
+    const ruleHints = doc.ruleCandidates.slice(0, 2).join(" | ");
+    const schemaHints = doc.schemaHints
+      ? `schema-hints settings=${doc.schemaHints.settings} blocks=${doc.schemaHints.blocks} presets=${doc.schemaHints.presets}`
       : "";
     return compact(
-      `${doc.title} [${doc.topic}] :: ${doc.summary} :: ${ruleHints} ${schemaHints}`,
+      `${doc.title} [${doc.topic}] :: ${doc.documentSummary} :: ${ruleHints} ${schemaHints}`,
     );
   });
 }

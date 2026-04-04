@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import {
   INDEX_DIR,
@@ -8,6 +9,7 @@ import {
   NORMALIZED_DOCS_DIR,
 } from "./paths.js";
 import type { NormalizedDocFile, ShopifyDocsIndex } from "./types.js";
+import { coerceNormalizedDocFile } from "./normalizedDocCompatibility.js";
 
 async function ensureDir(): Promise<void> {
   await fs.mkdir(INDEX_DIR, { recursive: true });
@@ -28,7 +30,16 @@ async function loadNormalizedDocuments(): Promise<NormalizedDocFile[]> {
     for (const file of files) {
       try {
         const text = await fs.readFile(file, "utf8");
-        docs.push(JSON.parse(text) as NormalizedDocFile);
+        const parsed = JSON.parse(text) as unknown;
+        const coerced = coerceNormalizedDocFile(parsed);
+        if (!coerced) {
+          console.warn(
+            `[build-index] Skip malformed normalized doc ${file}: missing required fields`,
+          );
+          continue;
+        }
+
+        docs.push(coerced);
       } catch (error) {
         console.warn(
           `[build-index] Skip invalid file ${file}: ${String(error)}`,
@@ -75,7 +86,18 @@ export async function runBuildIndex(): Promise<void> {
   );
 }
 
-void runBuildIndex().catch((error) => {
-  console.error("[build-index] Fatal pipeline error:", error);
-  process.exitCode = 1;
-});
+function isMainModule(): boolean {
+  const entry = process.argv[1];
+  if (!entry) {
+    return false;
+  }
+
+  return import.meta.url === pathToFileURL(entry).href;
+}
+
+if (isMainModule()) {
+  void runBuildIndex().catch((error) => {
+    console.error("[build-index] Fatal pipeline error:", error);
+    process.exitCode = 1;
+  });
+}
