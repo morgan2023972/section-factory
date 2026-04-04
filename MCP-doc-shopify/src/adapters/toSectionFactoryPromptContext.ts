@@ -9,6 +9,16 @@ import type {
   SectionFactoryPromptContextPayload,
 } from "./types.js";
 
+type LegacyDocCompat = {
+  summary?: string;
+  keyRules?: string[];
+  schemaSignals?: {
+    settings?: boolean;
+    blocks?: boolean;
+    presets?: boolean;
+  };
+};
+
 function compact(input: string): string {
   return input.replace(/\s+/g, " ").trim();
 }
@@ -36,12 +46,25 @@ function docsToPromptHints(
   limit = 3,
 ): string[] {
   return docs.slice(0, limit).map((doc) => {
-    const ruleHints = doc.ruleCandidates.slice(0, 2).join(" | ");
-    const schemaHints = doc.schemaHints
-      ? `schema-hints settings=${doc.schemaHints.settings} blocks=${doc.schemaHints.blocks} presets=${doc.schemaHints.presets}`
+    const legacy = doc as NormalizedDocFile & LegacyDocCompat;
+    const ruleCandidates = Array.isArray(doc.ruleCandidates)
+      ? doc.ruleCandidates
+      : Array.isArray(legacy.keyRules)
+        ? legacy.keyRules
+        : [];
+    const summary =
+      doc.documentSummary ??
+      legacy.summary ??
+      "No documentary excerpt available from normalized content.";
+    const schemaLike = doc.schemaHints ?? legacy.schemaSignals;
+
+    const ruleHints = ruleCandidates.slice(0, 2).join(" | ");
+    const schemaHints = schemaLike
+      ? `schema-hints settings=${schemaLike.settings === true} blocks=${schemaLike.blocks === true} presets=${schemaLike.presets === true}`
       : "";
+
     return compact(
-      `${doc.title} [${doc.topic}] :: ${doc.documentSummary} :: ${ruleHints} ${schemaHints}`,
+      `${doc.title} [${doc.topic}] :: ${summary} :: ${ruleHints} ${schemaHints}`,
     );
   });
 }
