@@ -1,0 +1,29 @@
+<section class="section-{{ section.id }}">
+  <h2>{{ section.settings.title }}</h2>
+</section>
+
+<style>
+.section-{{ section.id }} {
+  padding: 1rem;
+}
+</style>
+
+{% schema %}
+{
+  "name": "Valid Minimal",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Hello"
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Valid Minimal"
+    }
+  ]
+}
+{% endschema %}

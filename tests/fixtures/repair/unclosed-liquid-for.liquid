@@ -1,0 +1,27 @@
+<section class="section-{{ section.id }}">
+  <ul>
+    {% for block in section.blocks %}
+      <li>{{ block.settings.text }}</li>
+  </ul>
+</section>
+
+{% schema %}
+{
+  "name": "Unclosed For",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Unclosed For" }]
+}
+{% endschema %}

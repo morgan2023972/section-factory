@@ -1,0 +1,24 @@
+<section class="section-{{ section.id }}">
+  <h2 class="title">Title</h2>
+  <a class="button" href="#">Buy</a>
+</section>
+
+<style>
+.title {
+  color: red;
+}
+
+.button {
+  background: black;
+  color: white;
+}
+</style>
+
+{% schema %}
+{
+  "name": "Global CSS",
+  "settings": [],
+  "blocks": [],
+  "presets": [{ "name": "Global CSS" }]
+}
+{% endschema %}

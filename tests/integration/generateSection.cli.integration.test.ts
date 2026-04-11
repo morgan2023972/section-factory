@@ -12,6 +12,28 @@ function createDeps(): CliRuntimeDeps {
       isValid: true,
       errors: [] as string[],
     })),
+    repairSectionFn: vi.fn(async () => ({
+      success: false,
+      finalCode: null,
+      report: {
+        initialIssueCount: 1,
+        finalIssueCount: 1,
+        improved: false,
+        attemptCount: 1,
+        totalDuration: 10,
+        exitReason: "max_retries_exceeded" as const,
+        bestCandidateSelected: false,
+        hadRuntimeErrors: false,
+      },
+      attempts: [],
+      lastIssues: [
+        {
+          path: "section",
+          message: "Schema JSON is invalid.",
+          severity: "error" as const,
+        },
+      ],
+    })),
     log: vi.fn<(message: string) => void>(),
     error: vi.fn<(message: string) => void>(),
   };
@@ -27,6 +49,9 @@ describe("CLI integration - generateSection", () => {
     expect(deps.writeSectionToDiskFn).toHaveBeenCalledWith(
       "product-grid",
       "mock-section-code",
+    );
+    expect(deps.log).toHaveBeenCalledWith(
+      "Validation passed on first attempt. Repair not executed.",
     );
   });
 
@@ -65,19 +90,34 @@ describe("CLI integration - generateSection", () => {
       isValid: false,
       errors: ["Schema JSON is invalid."],
     }));
+    deps.repairSectionFn = vi.fn(async () => ({
+      success: false,
+      finalCode: null,
+      report: {
+        initialIssueCount: 1,
+        finalIssueCount: 1,
+        improved: false,
+        attemptCount: 2,
+        totalDuration: 10,
+        exitReason: "runtime_error" as const,
+        bestCandidateSelected: false,
+        hadRuntimeErrors: true,
+      },
+      attempts: [],
+      lastIssues: [
+        {
+          path: "section",
+          message: "Schema JSON is invalid.",
+          severity: "error" as const,
+        },
+      ],
+    }));
 
     const exitCode = await runCli(["hero"], deps);
 
     expect(exitCode).toBe(1);
-    expect(deps.log).toHaveBeenCalledWith(
-      "Validation failed. Starting retry correction (max 2 attempts).",
-    );
-    expect(deps.error).toHaveBeenCalledWith(
-      "Validation failed after retry attempts:",
-    );
-    expect(deps.error).toHaveBeenCalledWith(
-      "- section: Schema JSON is invalid.",
-    );
+    expect(deps.repairSectionFn).toHaveBeenCalledTimes(1);
+    expect(deps.error).toHaveBeenCalledWith("Repair produced no usable code.");
     expect(deps.writeSectionToDiskFn).not.toHaveBeenCalled();
   });
 
@@ -123,18 +163,13 @@ describe("CLI integration - generateSection", () => {
     const exitCode = await runCli(["hero", "--strict"], deps);
 
     expect(exitCode).toBe(1);
-    expect(deps.log).toHaveBeenCalledWith(
-      "Validation failed. Starting retry correction (max 2 attempts).",
-    );
+    expect(deps.repairSectionFn).toHaveBeenCalled();
     expect(deps.writeSectionToDiskFn).not.toHaveBeenCalled();
   });
 
-  it("retries and succeeds after an initial validation failure", async () => {
+  it("uses repaired output when generation is invalid and repair becomes valid", async () => {
     const deps = createDeps();
-    deps.generateSectionFn = vi
-      .fn()
-      .mockResolvedValueOnce("initial-invalid-code")
-      .mockResolvedValueOnce("corrected-valid-code");
+    deps.generateSectionFn = vi.fn().mockResolvedValue("initial-invalid-code");
     deps.validateSectionCodeFn = vi
       .fn()
       .mockReturnValueOnce({
@@ -145,97 +180,156 @@ describe("CLI integration - generateSection", () => {
         isValid: true,
         errors: [],
       });
+    deps.repairSectionFn = vi.fn(async () => ({
+      success: true,
+      finalCode: "corrected-valid-code",
+      report: {
+        initialIssueCount: 1,
+        finalIssueCount: 0,
+        improved: true,
+        attemptCount: 1,
+        totalDuration: 10,
+        exitReason: "success" as const,
+        bestCandidateSelected: true,
+        hadRuntimeErrors: false,
+      },
+      attempts: [],
+      lastIssues: [],
+    }));
 
     const exitCode = await runCli(["hero"], deps);
 
     expect(exitCode).toBe(0);
-    expect(deps.generateSectionFn).toHaveBeenCalledTimes(2);
+    expect(deps.generateSectionFn).toHaveBeenCalledTimes(1);
     expect(deps.log).toHaveBeenCalledWith(
-      "Validation failed. Starting retry correction (max 2 attempts).",
+      "Repair accepted: code is now valid (issues 1 -> 0).",
     );
-    expect(deps.log).toHaveBeenCalledWith("Retry correction succeeded.");
     expect(deps.writeSectionToDiskFn).toHaveBeenCalledWith(
       "hero",
       "corrected-valid-code",
     );
   });
 
-  it("passes --max-retries value to retry flow and succeeds on last allowed attempt", async () => {
+  it("uses repaired output when repair improves issue count without becoming valid", async () => {
     const deps = createDeps();
-    deps.generateSectionFn = vi
-      .fn()
-      .mockResolvedValueOnce("initial-invalid")
-      .mockResolvedValueOnce("retry-invalid")
-      .mockResolvedValueOnce("retry-valid");
+    deps.generateSectionFn = vi.fn().mockResolvedValue("initial-invalid");
     deps.validateSectionCodeFn = vi
       .fn()
       .mockReturnValueOnce({
         isValid: false,
-        errors: ["Schema JSON is invalid."],
+        errors: ["Schema JSON is invalid.", "Missing Shopify schema tags."],
       })
       .mockReturnValueOnce({
         isValid: false,
         errors: ["Schema JSON is invalid."],
-      })
-      .mockReturnValueOnce({
-        isValid: true,
-        errors: [],
       });
+    deps.repairSectionFn = vi.fn(async () => ({
+      success: false,
+      finalCode: "retry-improved",
+      report: {
+        initialIssueCount: 2,
+        finalIssueCount: 1,
+        improved: true,
+        attemptCount: 2,
+        totalDuration: 10,
+        exitReason: "max_retries_exceeded" as const,
+        bestCandidateSelected: true,
+        hadRuntimeErrors: false,
+      },
+      attempts: [],
+      lastIssues: [
+        {
+          path: "section",
+          message: "Schema JSON is invalid.",
+          severity: "error" as const,
+        },
+      ],
+    }));
 
-    const exitCode = await runCli(["hero", "--max-retries", "2"], deps);
+    const exitCode = await runCli(["hero"], deps);
 
     expect(exitCode).toBe(0);
-    expect(deps.generateSectionFn).toHaveBeenCalledTimes(3);
     expect(deps.log).toHaveBeenCalledWith(
-      "Validation failed. Starting retry correction (max 2 attempts).",
+      "Repair accepted: measurable improvement (issues 2 -> 1).",
     );
     expect(deps.writeSectionToDiskFn).toHaveBeenCalledWith(
       "hero",
-      "retry-valid",
+      "retry-improved",
     );
   });
 
-  it("fails when retries are exhausted and prints final blocking issues", async () => {
+  it("keeps initial output when repair has no measurable improvement", async () => {
     const deps = createDeps();
-    deps.generateSectionFn = vi
-      .fn()
-      .mockResolvedValueOnce("initial-invalid")
-      .mockResolvedValueOnce("retry-invalid-1")
-      .mockResolvedValueOnce("retry-invalid-2");
+    deps.generateSectionFn = vi.fn().mockResolvedValue("initial-invalid");
     deps.validateSectionCodeFn = vi.fn(() => ({
       isValid: false,
       errors: ["Schema JSON is invalid."],
     }));
+    deps.repairSectionFn = vi.fn(async () => ({
+      success: false,
+      finalCode: "still-invalid",
+      report: {
+        initialIssueCount: 1,
+        finalIssueCount: 1,
+        improved: false,
+        attemptCount: 2,
+        totalDuration: 10,
+        exitReason: "max_retries_exceeded" as const,
+        bestCandidateSelected: true,
+        hadRuntimeErrors: false,
+      },
+      attempts: [],
+      lastIssues: [
+        {
+          path: "section",
+          message: "Schema JSON is invalid.",
+          severity: "error" as const,
+        },
+      ],
+    }));
 
-    const exitCode = await runCli(["hero", "--max-retries", "2"], deps);
+    const exitCode = await runCli(["hero"], deps);
 
     expect(exitCode).toBe(1);
-    expect(deps.generateSectionFn).toHaveBeenCalledTimes(3);
     expect(deps.error).toHaveBeenCalledWith(
-      "Validation failed after retry attempts:",
-    );
-    expect(deps.error).toHaveBeenCalledWith(
-      "- section: Schema JSON is invalid.",
+      "Validation failed: no measurable improvement after repair.",
     );
     expect(deps.writeSectionToDiskFn).not.toHaveBeenCalled();
   });
 
-  it("treats --max-retries 0 as no retry and fails immediately", async () => {
+  it("captures repair throw and keeps initial output", async () => {
     const deps = createDeps();
     deps.generateSectionFn = vi.fn().mockResolvedValueOnce("invalid-code");
     deps.validateSectionCodeFn = vi.fn(() => ({
       isValid: false,
       errors: ["Schema JSON is invalid."],
     }));
+    deps.repairSectionFn = vi.fn(async () => {
+      throw new Error("repair boom");
+    });
 
-    const exitCode = await runCli(["hero", "--max-retries", "0"], deps);
+    const exitCode = await runCli(["hero"], deps);
 
     expect(exitCode).toBe(1);
     expect(deps.generateSectionFn).toHaveBeenCalledTimes(1);
-    expect(deps.error).toHaveBeenCalledWith("Validation failed:");
-    expect(deps.error).toHaveBeenCalledWith("- Schema JSON is invalid.");
-    expect(deps.log).not.toHaveBeenCalledWith(
-      "Validation failed. Starting retry correction (max 0 attempts).",
+    expect(deps.error).toHaveBeenCalledWith("Repair failed: repair boom");
+    expect(deps.writeSectionToDiskFn).not.toHaveBeenCalled();
+  });
+
+  it("does not run repair when already valid", async () => {
+    const deps = createDeps();
+    deps.validateSectionCodeFn = vi.fn(() => ({
+      isValid: true,
+      errors: [],
+    }));
+
+    const exitCode = await runCli(["hero"], deps);
+
+    expect(exitCode).toBe(0);
+    expect(deps.repairSectionFn).not.toHaveBeenCalled();
+    expect(deps.writeSectionToDiskFn).toHaveBeenCalledWith(
+      "hero",
+      "mock-section-code",
     );
   });
 

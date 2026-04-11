@@ -1,0 +1,22 @@
+<section class="section-{{ section.id }}">
+  <h2>{{ section.settings.title }}</h2>
+</section>
+
+{% schema %}
+{
+  "name": "Broken Schema",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+    }
+  ],
+  "blocks": [
+  "presets": [
+    {
+      "name": "Broken Schema"
+    }
+  ]
+}
+{% endschema %}

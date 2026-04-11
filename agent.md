@@ -79,6 +79,14 @@ Validator MUST NOT depend solely on documentation.
 6. fix issues
 7. output final `.liquid`
 
+Repair flow for existing sections:
+
+1. validate current file
+2. skip repair entirely if no blocking issue exists
+3. run minimal deterministic fixes + iterative repair when needed
+4. keep the best candidate seen so far if full validity is not reached
+5. expose lightweight observability in CLI/reporting
+
 ---
 
 ## ✅ VALIDATION RULES
@@ -98,6 +106,8 @@ Validation MUST:
 - work without MCP
 - separate errors vs warnings
 - expose clear ruleId
+- preserve business content when repair is partial
+- avoid destructive rewrites on already valid input
 
 ---
 
@@ -149,6 +159,12 @@ If invalid:
 2. fix immediately
 3. revalidate
 4. return corrected version
+
+If partially fixed:
+
+1. keep the best candidate
+2. report remaining blocking issues clearly
+3. do not pretend full success
 
 ---
 

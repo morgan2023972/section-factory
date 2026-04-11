@@ -1,0 +1,42 @@
+<section class="section-{{ section.id }}">
+  {% if section.settings.show %}
+    <h2 class="title">{{ section.settings.title }}</h2>
+  {% for block in section.blocks %}
+    <div>{{ block.settings.text }}</div>
+</section>
+
+<style>
+.title {
+  color: #222;
+}
+</style>
+
+<script>
+document.querySelector('.title');
+</script>
+
+{% schema %}
+{
+  "name": "Mixed Broken",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Mixed Broken" }]
+}

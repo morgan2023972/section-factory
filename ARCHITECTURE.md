@@ -38,12 +38,21 @@ Un sous-projet annexe existe pour MCP Shopify:
   - Scripts CLI specialises
   - `generateSection.ts`: generation + retry
   - `optimizeSection.ts`: assistant d optimisation (rapport-only par defaut)
+  - `repairSection.ts`: reparation d une section existante avec reporting text/json et court-circuit si la validation initiale est deja OK
   - `validateSection.ts`: validation seule (report text/json)
   - `doctor.ts`: checks environnement (env, modele, dossiers, config, runtime)
 
 - src/core/
   - Logique metier principale
   - Validation, construction, generation, regles design
+
+- src/core/repair/
+  - Module de reparation decoupe en helpers purs + orchestrateur
+  - `repairSection.ts`: boucle principale de reparation et selection du meilleur candidat
+  - `buildRepairPrompt.ts`: construction du prompt iteratif
+  - `extractRepairedCode.ts`: extraction du code utile depuis la reponse du modele
+  - `applyLocalFixes.ts`: corrections deterministes ultra-limitees
+  - `types.ts`: contrats partages repair/CLI
 
 - src/core/sectionOptimizer/
   - Pipeline d optimisation MVP
@@ -176,6 +185,18 @@ Fichier: src/cli/validateSection.ts
 - Retourne des diagnostics avec `ruleId` fins (regex + AST)
 - Retourne `0` (valide), `1` (invalide), `2` (erreur usage/lecture)
 
+Fichier: src/cli/repairSection.ts
+
+- Commande `npm run repair -- <file> [options]`
+- Validate d abord le fichier cible puis evite tout appel de repair si aucun issue bloquant n est detecte
+- Supporte `--write`, `--output`, `--format` et `--max-retries`
+- Expose une observabilite minimale stable:
+  - validation initiale OK/FAIL
+  - repair tente ou non
+  - resultat final utilise ou non
+  - amelioration detectee ou non
+- Retourne `0` (valide ou reparee), `1` (repair incomplet), `2` (erreur usage/IO)
+
 Fichier: src/cli/doctor.ts
 
 - Commande `npm run doctor`
@@ -212,8 +233,15 @@ Fichier: src/cli/doctor.ts
 ### Tests d integration
 
 - CLI generate
+- CLI repair
 - CLI validate
 - CLI doctor
+
+Tests comportementaux repair:
+
+- `tests/integration/repair.behavior.base.test.ts`: socle comportemental minimal (safety, amelioration, non-destruction)
+- `tests/integration/repairSection.behavior.fixtures.test.ts`: revue par fixtures representatives, y compris idempotence normalisee
+- `tests/integration/repairTestUtils.ts`: helpers partages pour fixtures et normalisation de comparaison
 
 Scripts npm:
 
@@ -237,6 +265,8 @@ Etapes:
 - Validation dissociee de la CLI
 - Activation progressive AST-light pour limiter les faux positifs
 - Tests unitaires orientes comportement
+- Observabilite CLI legere plutot qu un reporting verbeux
+- Idempotence verifiee au niveau integration sur un petit nombre de fixtures representatives
 
 ## Extension future recommandee
 

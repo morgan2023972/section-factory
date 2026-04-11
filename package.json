@@ -7,6 +7,7 @@
     "dev": "tsx src/index.ts",
     "list-sections": "tsx src/index.ts --list-sections",
     "generate": "tsx src/cli/generateSection.ts",
+    "repair": "tsx src/cli/repairSection.ts",
     "optimize": "tsx src/cli/optimizeSection.ts",
     "validate": "tsx src/cli/validateSection.ts",
     "doctor": "tsx src/cli/doctor.ts",

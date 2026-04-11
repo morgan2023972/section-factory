@@ -1,6 +1,6 @@
 # Documentation projet - section-factory
 
-Date de mise a jour: 2026-04-01
+Date de mise a jour: 2026-04-11
 
 ## 1. Resume
 
@@ -56,6 +56,7 @@ Depuis la racine du depot:
 - npm run list-sections
 - npm run generate -- <section-type> [options]
 - npm run optimize -- <file-path> [options]
+- npm run repair -- <file-path> [options]
 - npm run validate -- <file-path> [options]
 - npm run doctor -- [options]
 - npm run build
@@ -227,6 +228,52 @@ Note implementation:
 
 - le probe OpenAI utilise max_output_tokens=16 pour eviter un faux negatif d API sur des valeurs trop basses
 
+### 5.6 src/cli/repairSection.ts
+
+Pipeline:
+
+1. parse des options
+2. lecture du fichier .liquid cible
+3. validation initiale
+4. court-circuit si aucun issue bloquant n est detecte
+5. lancement du moteur repair en mode non-strict sinon
+6. ecriture optionnelle uniquement en cas de succes complet
+7. emission d un rapport text ou JSON
+
+Options:
+
+- --write
+- --output <path> ou --output=<path>
+- --format <text|json> ou --format=<...>
+- --max-retries <n> ou --max-retries=<n>
+- --help
+
+Valeurs par defaut:
+
+- format: text
+- maxRetries: 2
+- mode repair: non-strict
+
+Observabilite exposee:
+
+- validation initiale OK/FAIL
+- repair tente ou non
+- resultat final utilise ou non
+- amelioration detectee ou non
+
+Codes de sortie:
+
+- 0: section deja valide ou reparee
+- 1: repair incomplet apres tentatives
+- 2: erreur parsing CLI ou IO
+
+Comportement reel actuel:
+
+- corrige bien les balises schema manquantes ou incompletes
+- corrige bien les desequilibres simples de controle Liquid
+- corrige partiellement les schemas JSON invalides
+- ne garantit pas une reparation semantique complete du CSS/JS
+
 ## 6. Coeur metier (src/core)
 
 ### 6.1 Registre des types de sections
@@ -258,6 +305,40 @@ Types actifs:
 ### 6.2 Generation OpenAI
 
 Fichier: src/core/sectionGenerator.ts
+
+### 6.3 Module repair
+
+Fichiers: src/core/repair/*
+
+Structure:
+
+- buildRepairPrompt.ts
+- extractRepairedCode.ts
+- applyLocalFixes.ts
+- repairSection.ts
+- types.ts
+
+Responsabilites:
+
+- construire un prompt de correction iteratif
+- extraire proprement le code utile de la reponse modele
+- appliquer quelques corrections deterministes sans refonte lourde
+- conserver le meilleur candidat si la validite complete n est pas atteinte
+
+Limites assumees:
+
+- selection conservative du meilleur candidat
+- pas de rewriter riche CSS/JS en local
+- couverture comportementale privilegiee sur idealisation du resultat
+
+## 11. Journal recent de mise a jour
+
+Mise a jour 2026-04-11:
+
+- ajout et stabilisation du module `repair`
+- ajout du reporting leger de `repair` dans le CLI texte et JSON
+- ajout de tests comportementaux par groupes (safety, amelioration, non-destruction, idempotence)
+- factorisation des helpers de tests d integration repair dans `tests/integration/repairTestUtils.ts`
 
 - appelle client.responses.create
 - modele par defaut: gpt-4.1-mini

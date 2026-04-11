@@ -1,0 +1,26 @@
+<section class="section-{{ section.id }}">
+  {% if section.settings.show_title %}
+    <h2>{{ section.settings.title }}</h2>
+</section>
+
+{% schema %}
+{
+  "name": "Unclosed If",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show title",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Title"
+    }
+  ],
+  "blocks": [],
+  "presets": [{ "name": "Unclosed If" }]
+}
+{% endschema %}

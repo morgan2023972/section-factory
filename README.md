@@ -123,6 +123,55 @@ Valider une section existante sans génération :
 npm run validate -- output/sections/hero.liquid
 ```
 
+Reparer une section existante (sans ecriture par defaut) :
+
+```bash
+npm run repair -- output/sections/hero.liquid
+```
+
+Reparer puis ecrire le resultat en sortie :
+
+```bash
+npm run repair -- output/sections/hero.liquid --write --output output/sections/hero.repaired.liquid
+```
+
+Afficher le rapport de reparation en JSON :
+
+```bash
+npm run repair -- output/sections/hero.liquid --format=json
+```
+
+Augmenter le nombre maximal de tentatives de reparation :
+
+```bash
+npm run repair -- output/sections/hero.liquid --max-retries=4
+```
+
+Codes de sortie de `repair` :
+
+- `0`: section valide ou reparée
+- `1`: echec de reparation apres epuisement des tentatives
+- `2`: erreur CLI (arguments, I/O, etc.)
+
+Note: en V1, `--write` ecrit uniquement en cas de succes complet de reparation.
+
+Observabilite legere de `repair`:
+
+- validation initiale: `OK` ou `FAIL`
+- repair tente: `yes` ou `no`
+- resultat final utilise: `yes` ou `no`
+- amelioration detectee: `yes` ou `no`
+
+Le rapport texte affiche ces quatre lignes avant le resume de statut. Le rapport JSON ajoute un bloc `observability` avec les memes indicateurs.
+
+Comportement reel actuel de `repair`:
+
+- corrige bien les balises `schema` manquantes ou incompletes
+- corrige bien les desequilibres simples `if` / `endif` et `for` / `endfor`
+- corrige partiellement les schemas JSON invalides en selectionnant le meilleur candidat disponible
+- ne reecrit pas agressivement la structure metier si la validation initiale est deja OK
+- n assure pas a lui seul une correction semantique complete du HTML/CSS/JS
+
 Optimiser une section existante (rapport uniquement par defaut) :
 
 ```bash
@@ -247,6 +296,11 @@ npm run coverage
 ```
 
 Les rapports sont generes dans le dossier `coverage/` (text, json, html, lcov).
+
+## Releases
+
+- Derniere note: [v1.9.0](docs/releases/v1.9.0.md)
+- Historique: [docs/releases](docs/releases)
 
 ## Workflow d'équipe
 

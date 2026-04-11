@@ -1,0 +1,18 @@
+<section class="section-{{ section.id }}">
+  <button class="cta">Click</button>
+</section>
+
+<script>
+document.querySelector('.cta')?.addEventListener('click', () => {
+  window.alert('clicked');
+});
+</script>
+
+{% schema %}
+{
+  "name": "Global JS",
+  "settings": [],
+  "blocks": [],
+  "presets": [{ "name": "Global JS" }]
+}
+{% endschema %}
