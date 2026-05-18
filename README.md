@@ -1,350 +1,132 @@
-[![CI](https://github.com/morgan2023972/section-factory/actions/workflows/ci.yml/badge.svg)](https://github.com/morgan2023972/section-factory/actions)
-[![codecov](https://codecov.io/gh/morgan2023972/section-factory/branch/main/graph/badge.svg)](https://codecov.io/gh/morgan2023972/section-factory)
+[![Status](https://img.shields.io/badge/status-private_alpha-orange)](#current-status)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-339933)](#quick-start-cli)
+[![TypeScript](https://img.shields.io/badge/typescript-cli-3178C6)](#quick-start-cli)
+[![License](https://img.shields.io/badge/license-TBD-lightgrey)](#license)
 
 # Section Factory
 
-Section Factory est un projet TypeScript pour générer et valider des sections Shopify avec une architecture claire, testable et extensible.
+A safer workflow for generating, validating, repairing, and exporting Shopify Liquid sections.
 
-## Objectif du projet
+Section Factory is a developer-first CLI that helps Shopify teams move faster with AI-assisted custom Liquid section workflows while keeping validation, repair, optimization, and export steps explicit.
 
-- Centraliser la définition des types de sections supportés
-- Garantir une validation cohérente en mode strict et non-strict
-- Exposer des commandes CLI simples pour l'équipe
-- Maintenir une base fiable grâce aux tests unitaires et à la CI
+## What Is Section Factory?
 
-## Fonctionnalités actuelles
+Section Factory is a Node.js + TypeScript CLI focused on custom Shopify section workflows. It is designed for teams who want to move faster with AI-assisted generation while keeping technical quality gates in place before shipping code to themes.
 
-- Registre central des types de sections
-- Validator de section branché sur le registre central
-- Commande CLI --list-sections (commande dediee)
-- Commande CLI --list-profiles
-- Commande CLI validate dédiée (validation séparée de la génération)
-- Commande CLI optimize dédiée (assistant d optimisation MVP)
-- Critere de succes optimizer par axe (taille, securite, structure)
-- Validation AST-light progressive sur la commande validate (off/advisory/warn/block)
-- Configuration runtime des politiques AST via JSON externe (sans rebuild)
-- Commande CLI de diagnostic des politiques AST effectives
-- Commande CLI doctor pour vérifier la santé de l'environnement
-- Mapping de diagnostics validate avec ruleId fins (schema, css, js, mobile, design_system)
-- Tests unitaires avec Vitest
-- Pipeline CI avec tests puis build
+## Why This Exists
 
-## Structure du projet
+Building custom Shopify sections is often repetitive and time-consuming.
 
-- src/core/section-types/registry.ts : source unique de vérité des types de sections
-- src/core/validation/designValidator.ts : validation des sections
-- src/index.ts : point d'entrée CLI
-- tests/unit : tests unitaires
-- .github/workflows/ci.yml : pipeline CI
+Raw AI output can be useful, but it is frequently fragile in real theme contexts. Production-ready sections must respect Liquid conventions, section schema rules, settings structure, CSS scoping, and theme compatibility constraints.
 
-## Prérequis
+Section Factory exists to provide a more reliable workflow for developers who still want control and review, not a black-box generator.
 
-- Node.js 20 ou plus
+## Who Is This For?
+
+- Shopify developers
+- Shopify freelancers
+- Small Shopify agencies
+- Theme developers
+- Product builders working with Shopify automation
+
+## Current Status
+
+**Section Factory is currently in private alpha.**
+
+Today, the product is available as a developer-oriented CLI. The current goal is to validate and harden the end-to-end workflow before packaging a broader product experience.
+
+## What It Does Today
+
+- Generate Shopify section files
+- Validate generated or existing sections
+- Attempt repair when validation fails
+- Produce optimization reports
+- Export ready-to-use Liquid section files
+- Provide CLI diagnostics through a `doctor` command
+- Support a section type registry
+
+## What It Is Not Yet
+
+Section Factory is not yet:
+
+- A public SaaS
+- A Shopify App Store app
+- A no-code page builder
+- A finished commercial product
+- A replacement for developer review
+
+## How It Works
+
+```text
+prompt -> generate -> validate -> repair -> optimize -> export
+```
+
+The pipeline is intentionally explicit so each step can be inspected, tested, and improved.
+
+## Quick Start (CLI)
+
+### Requirements
+
+- Node.js 20+
 - npm
 
-## Installation
+### Install
 
 ```bash
 npm install
 ```
 
-## Commandes utiles
-
-Lancer le projet en dev :
+### Common Commands
 
 ```bash
-npm run dev
-```
-
-Lister les sections disponibles (type, alias, description, support design-system) :
-
-```bash
+# List available section types
 npm run list-sections
-```
 
-Compatibilite legacy :
-
-```bash
-npm run dev -- --list-types
-```
-
-Note: `--list-types` est deprecie et sera retire dans 2 releases. Utilisez `--list-sections`.
-
-Lister les profils design disponibles :
-
-```bash
-npm run dev -- --list-profiles
-```
-
-Afficher la politique AST effective chargee au runtime :
-
-```bash
-npm run dev -- --show-ast-policy
-```
-
-Cette commande affiche un JSON de diagnostic avec:
-
-- configPath (chemin effectivement resolu)
-- loadedFromEnv (si la variable SECTION_FACTORY_AST_RULE_CONFIG est utilisee)
-- envVar
-- ruleCount
-- policies (politique effective chargee)
-
-Generer une section hero (validation non-strict par defaut) :
-
-```bash
+# Generate a section (example)
 npm run generate -- hero
-```
 
-Forcer une generation avec validation stricte :
-
-```bash
-npm run generate -- hero --strict
-```
-
-Contraintes du mode strict (generation):
-
-- CSS scope obligatoire sous `.section-{{ section.id }}`
-- Aucun selecteur CSS global
-- Si du JavaScript est present, il doit etre scope a la section
-- Interdit: `document.querySelector`, `document.querySelectorAll`, `getElementById`, `getElementsByClassName`, `getElementsByTagName`, `window.*`, `addEventListener(...)` global
-- Pattern JS recommande en strict:
-
-```js
-const root = document.currentScript?.closest(".section-{{ section.id }}");
-if (!root) return;
-
-const cta = root.querySelector(".section-{{ section.id }}__cta");
-```
-
-Valider une section existante sans génération :
-
-```bash
+# Validate a section file
 npm run validate -- output/sections/hero.liquid
-```
 
-Reparer une section existante (sans ecriture par defaut) :
-
-```bash
+# Attempt repair on a section file
 npm run repair -- output/sections/hero.liquid
-```
 
-Reparer puis ecrire le resultat en sortie :
-
-```bash
-npm run repair -- output/sections/hero.liquid --write --output output/sections/hero.repaired.liquid
-```
-
-Afficher le rapport de reparation en JSON :
-
-```bash
-npm run repair -- output/sections/hero.liquid --format=json
-```
-
-Augmenter le nombre maximal de tentatives de reparation :
-
-```bash
-npm run repair -- output/sections/hero.liquid --max-retries=4
-```
-
-Codes de sortie de `repair` :
-
-- `0`: section valide ou reparée
-- `1`: echec de reparation apres epuisement des tentatives
-- `2`: erreur CLI (arguments, I/O, etc.)
-
-Note: en V1, `--write` ecrit uniquement en cas de succes complet de reparation.
-
-Observabilite legere de `repair`:
-
-- validation initiale: `OK` ou `FAIL`
-- repair tente: `yes` ou `no`
-- resultat final utilise: `yes` ou `no`
-- amelioration detectee: `yes` ou `no`
-
-Le rapport texte affiche ces quatre lignes avant le resume de statut. Le rapport JSON ajoute un bloc `observability` avec les memes indicateurs.
-
-Comportement reel actuel de `repair`:
-
-- corrige bien les balises `schema` manquantes ou incompletes
-- corrige bien les desequilibres simples `if` / `endif` et `for` / `endfor`
-- corrige partiellement les schemas JSON invalides en selectionnant le meilleur candidat disponible
-- ne reecrit pas agressivement la structure metier si la validation initiale est deja OK
-- n assure pas a lui seul une correction semantique complete du HTML/CSS/JS
-
-Optimiser une section existante (rapport uniquement par defaut) :
-
-```bash
+# Produce optimization report
 npm run optimize -- output/sections/hero.liquid
-```
 
-Exiger un gain taille minimum pour valider l axe compression/cleanup :
-
-```bash
-npm run optimize -- output/sections/hero.liquid --size-threshold=8
-```
-
-Optimiser puis ecrire la version optimisee dans un fichier de sortie :
-
-```bash
-npm run optimize -- output/sections/hero.liquid --write --output output/sections/hero.optimized.liquid
-```
-
-Le rapport optimize expose des criteres de succes independants:
-
-- Taille: succes si gain >= seuil configure (`--size-threshold`, defaut 5)
-- Securite: succes si le nombre de patterns risques diminue
-- Structure: succes si au moins une regle de conformite est appliquee
-
-Valider en mode non-strict (certaines règles deviennent des warnings) :
-
-```bash
-npm run validate -- output/sections/hero.liquid --non-strict
-```
-
-Valider avec sortie JSON (préparation CI/outillage) :
-
-```bash
-npm run validate -- output/sections/hero.liquid --format=json
-```
-
-Activer les diagnostics AST-light en advisory (non bloquants) :
-
-```bash
-npm run validate -- output/sections/hero.liquid --ast-validate
-```
-
-Choisir explicitement la phase AST :
-
-```bash
-npm run validate -- output/sections/hero.liquid --ast-phase=off
-npm run validate -- output/sections/hero.liquid --ast-phase=advisory
-npm run validate -- output/sections/hero.liquid --ast-phase=warn
-npm run validate -- output/sections/hero.liquid --ast-phase=block
-```
-
-Vérifier l'environnement avec doctor :
-
-```bash
+# Run environment diagnostics
 npm run doctor
 ```
 
-Vérifier l'environnement avec sortie JSON :
+## Technical Direction
 
-```bash
-npm run doctor -- --format=json
-```
+Section Factory is being built as a robust foundation first (CLI + validation + repair + optimization). The longer-term direction is to evolve this workflow into a more packaged SaaS/API or platform experience once reliability is proven.
 
-Le doctor vérifie notamment:
+## Join The Private Alpha
 
-- présence de OPENAI_API_KEY
-- accès au modèle OpenAI configuré
-- présence des dossiers output et output/sections
-- compatibilité de la version Node (>= 20)
-- présence de fichiers de config attendus (`package.json`, `tsconfig.json`, `README.md`, `.github/workflows/ci.yml`)
+Section Factory is currently looking for a small number of Shopify developers, freelancers, and small agencies to provide feedback on real section-building workflows.
 
-Le rapport JSON de doctor contient l'etat de sante (`isHealthy`), un resume (`summary`) et la liste des checks (`checks`).
+If you regularly build custom Shopify sections and want to follow or test the project, you can:
 
-Le rapport JSON versionne (`reportVersion: 2` et `reportSchemaVersion: "1.1.0"`) concerne la commande validate.
+- Watch this repository
+- Open an issue with feedback
+- Contact me on LinkedIn
+- Join the early access list: coming soon
 
-Exemple d'utilisation du mode design system avec diagnostics fins :
+## Security And Scope
 
-```bash
-npm run validate -- output/sections/hero.liquid --design-system --format=json
-```
+- This public repository is a technical and product showcase.
+- Premium prompts, private strategy, and sensitive operational data are intentionally excluded.
+- Do not commit API keys or secrets in issues, pull requests, or examples.
 
-Le rapport inclut des `ruleId` détaillés, par exemple :
+## Feedback
 
-- `schema.missing_tags`
-- `css.global_selector`
-- `js.global_document_access`
-- `ux.mobile_missing_media_rules`
-- `design_system.tokens_required`
+Feedback and issue reports are welcome, especially from Shopify developers testing real theme workflows.
 
-Quand AST-light est activé, le rapport JSON passe en moteur `hybrid-v1` (sinon `regex-v1`) et ajoute des diagnostics AST (source `shopify-validator-ast-v1`).
+If you want to follow the alpha progression, watch the repository and check release notes.
 
-Configuration runtime des politiques AST:
+## License
 
-- Fichier par defaut: config/ast-rule-policies.json
-- Variable d environnement optionnelle: SECTION_FACTORY_AST_RULE_CONFIG (chemin vers un JSON externe)
-- Permet d ajuster les severites par `ruleId` et par phase (`advisory`, `warn`, `block`) sans rebuild TypeScript
+License details are currently being evaluated.
 
-Compiler le projet :
-
-```bash
-npm run build
-```
-
-Lancer les tests unitaires :
-
-```bash
-npm run test:unit
-```
-
-Lancer les tests en mode watch :
-
-```bash
-npm run test:watch
-```
-
-## Coverage
-
-Generer le rapport de couverture de tests :
-
-```bash
-npm run coverage
-```
-
-Les rapports sont generes dans le dossier `coverage/` (text, json, html, lcov).
-
-## Releases
-
-- Derniere note: [v1.9.0](docs/releases/v1.9.0.md)
-- Historique: [docs/releases](docs/releases)
-
-## Workflow d'équipe
-
-1. Créer une branche de travail depuis main
-2. Développer une modification ciblée
-3. Lancer localement : tests unitaires puis build
-4. Ouvrir une Pull Request
-5. Laisser la CI valider automatiquement le changement
-
-## Qualité et conventions
-
-- Toute nouvelle section doit être ajoutée dans le registre central
-- Le validator ne doit pas contenir de liste locale des types
-- Favoriser un code lisible, modulaire et testable
-- Ajouter ou mettre à jour les tests pour toute règle métier modifiée
-
-## CI minimale
-
-Le workflow GitHub Actions s'exécute sur push vers main et sur pull request.
-
-Étapes :
-
-1. Installation des dépendances avec npm ci
-2. Exécution des tests unitaires avec npm run test:unit
-3. Vérification de compilation avec npm run build
-
-## Checklist Pull Request
-
-- Le code compile sans erreur
-- Les tests unitaires passent
-- Les changements de logique sont couverts par des tests
-- Le README ou la documentation est mis à jour si nécessaire
-
-## Templates équipe
-
-- Template de Pull Request : .github/pull_request_template.md
-- Template de message de commit : .github/commit-message-template.txt
-
-Pour utiliser le template de commit en local :
-
-1. git config commit.template .github/commit-message-template.txt
-
-## Roadmap courte
-
-- Enrichir la CLI pour lister les catégories de sections
-- Ajouter des validations de compatibilité avancées
-- Étendre la génération IA en s'appuyant sur le registre central
+Until a license is explicitly added, this repository should be considered source-available for review and feedback, not open-source for unrestricted reuse.
